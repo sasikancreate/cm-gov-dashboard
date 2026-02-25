@@ -10,74 +10,61 @@
     <div id="map"></div>
     <div id="detail-content"></div>
     <script>
-        //async function initDashboard() {
+async function initDashboard() {
     try {
-        // 1. โหลดข้อมูล
-        const response = await fetch('data.json');
-        const projects = await response.json();
-        
-        // 2. สร้างแผนที่
-        const map = L.map('map').setView([18.7883, 98.9853], 8);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        // 1. ตรวจสอบว่ามี Library Leaflet หรือยัง
+        if (typeof L === 'undefined') {
+            console.error("Leaflet.js ยังไม่ถูกโหลด! ตรวจสอบลิงก์ใน Head");
+            return;
+        }
 
-        // 3. โหลด GeoJSON และเชื่อมข้อมูล
-        const geoRes = await fetch('districts.json');
+        // 2. สร้างแผนที่ (ใส่พิกัดกลางเชียงใหม่)
+        const map = L.map('map').setView([18.7883, 98.9853], 8);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 3. ดึงข้อมูลจาก GitHub (ต้องมั่นใจว่าชื่อไฟล์ data.json และ districts.json สะกดถูก)
+        const [dataRes, geoRes] = await Promise.all([
+            fetch('data.json').catch(e => null),
+            fetch('districts.json').catch(e => null)
+        ]);
+
+        if (!dataRes || !geoRes) throw new Error("โหลดไฟล์ JSON ไม่สำเร็จ");
+
+        const projectData = await dataRes.json();
         const geoData = await geoRes.json();
 
+        // 4. วาดแผนที่
         L.geoJSON(geoData, {
             style: function(feature) {
-                // ดึงชื่ออำเภอมาเช็ค (ลองใช้ NAME_2 เพราะมักจะเป็นชื่ออำเภอในไฟล์มาตรฐาน)
-                const dName = feature.properties.amphoe_th || feature.properties.NAME_2;
+                // จากไฟล์ districts.json ของคุณ ชื่ออำเภอจะอยู่ใน feature.properties.amphoe_th
+                // หรือลองใช้ properties.NAME_2 ถ้าไม่ขึ้น
+                const dName = feature.properties.amphoe_th || feature.properties.NAME_2 || "ไม่ทราบชื่อ";
+                
                 return {
-                    fillColor: '#3b82f6', // ให้เป็นสีฟ้าไว้ก่อนถ้าโหลดได้
-                    weight: 1,
-                    fillOpacity: 0.6
+                    fillColor: '#3b82f6', // ให้เป็นสีฟ้าพื้นฐานไว้ก่อน
+                    weight: 1.5,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7
                 };
+            },
+            onEachFeature: function(feature, layer) {
+                const dName = feature.properties.amphoe_th || feature.properties.NAME_2;
+                layer.bindTooltip("อำเภอ" + dName); // แสดงชื่อเมื่อเอาเมาส์วาง
             }
         }).addTo(map);
 
-    } catch (e) {
-        console.error("ผิดพลาด:", e);
-        alert("หาไฟล์ข้อมูลไม่พบ กรุณาตรวจสอบชื่อไฟล์ data.json และ districts.json ใน GitHub");
+        console.log("แผนที่โหลดสำเร็จ!");
+
+    } catch (error) {
+        console.error("พบข้อผิดพลาด:", error);
     }
 }
-initDashboard();
-        async function initDashboard() {
-        try {
-            // โหลดข้อมูลจาก GitHub ของคุณ
-            const [dataRes, geoRes] = await Promise.all([
-                fetch('data.json'),
-                fetch('districts.json')
-            ]);
-            const projectData = await dataRes.json();
-            const geoData = await geoRes.json();
 
-            // สร้างแผนที่
-            const map = L.map('map').setView([18.7883, 98.9853], 8);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-            // วาดแผนที่จากไฟล์ districts.json
-            L.geoJSON(geoData, {
-                style: (feature) => {
-                    // ดึงชื่ออำเภอจากไฟล์ districts.json ของคุณ
-                    // ไฟล์ที่คุณอัพโหลดมาส่วนใหญ่จะใช้ฟิลด์ 'amphoe_th' หรือ 'NAME_2'
-                    const dName = feature.properties.amphoe_th || feature.properties.NAME_2;
-                    return {
-                        fillColor: '#3b82f6', // สีเริ่มต้น
-                        weight: 1,
-                        fillOpacity: 0.7,
-                        color: 'white'
-                    };
-                }
-            }).addTo(map);
-
-        } catch (e) {
-            console.error("Error:", e);
-        }
-    }
-
-    // เรียกใช้งานฟังก์ชัน
-    initDashboard();
+// สั่งให้ทำงานทันทีเมื่อโหลดหน้าเว็บ
+window.onload = initDashboard;
 </script>
     <style>
         #map { height: 600px; border-radius: 15px; }

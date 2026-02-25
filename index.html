@@ -7,8 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <div id="map"></div>
-    <div id="detail-content"></div>
+    <div class="lg:col-span-2 bg-white p-4 rounded-xl shadow-lg">
+    <h3 class="text-xl font-semibold mb-4 text-gray-700">แผนที่แสดงผลรายอำเภอ (Heat Map)</h3>
+    <div id="map" style="height: 500px; width: 100%; border-radius: 10px;"></div>
+    </div>
     <script>
 async function initDashboard() {
     try {
@@ -184,3 +186,16 @@ function getColor(districtName, projectsData) {
                              '#C0392B' : // แดงเข้ม (อยู่ระหว่างอนุมัติโครงการ)
                              '#424242' : // เทา (ยกเลิกกิจกรรม)
 }
+<script>
+    function initDashboard() {
+        // ... โค้ดสร้างแผนที่ทั้งหมดที่ผมเคยให้ไว้ ...
+        
+        // บรรทัดนี้จะไปหา div ที่มี id="map" แล้ววาดแผนที่ลงไปในนั้น
+        const map = L.map('map').setView([18.7883, 98.9853], 8);
+        
+        // ... ส่วนที่เหลือของโค้ด ...
+    }
+
+    // เรียกใช้เมื่อหน้าเว็บโหลดเสร็จสมบูรณ์เท่านั้น
+    window.addEventListener('load', initDashboard);
+</script>

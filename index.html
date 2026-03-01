@@ -90,15 +90,33 @@
 
                 // 3. วาดพื้นที่อำเภอลงในแผนที่
                 L.geoJSON(geoData, {
-                    style: function(feature) {
-                        return {
-                            fillColor: '#3b82f6', // สีพื้นฐาน
-                            weight: 1.5,
-                            opacity: 1,
-                            color: 'white',
-                            fillOpacity: 0.6
-                        };
-                    },
+              function getStyle(feature, projects) {
+                const dName = feature.properties.amphoe_th || feature.properties.NAME_2;
+                // กรองโครงการในอำเภอนี้
+                const districtProjects = projects.filter(p => p.Districts && p.Districts.includes(dName));
+    
+                if (districtProjects.length === 0) return { fillColor: '#f1f5f9', weight: 1, fillOpacity: 0.5, color: '#cbd5e1' };
+
+                // คำนวณความก้าวหน้า (เช่น ถ้ามี 'ลงนาม' หรือ 'ดำเนินการ' เกินครึ่งให้เป็นสีเขียว)
+                const completedCount = districtProjects.filter(p => 
+                    p.Status.includes('ลงนาม') || p.Status.includes('ดำเนินการ') || p.Status.includes('GFMIS')
+                ).length;
+    
+                const progressPercent = (completedCount / districtProjects.length) * 100;
+
+                // ไล่สีตามความก้าวหน้า
+                let color = '#ef4444'; // แดง (น้อยกว่า 30%)
+                if (progressPercent > 70) color = '#10b981'; // เขียว (มากกว่า 70%)
+                else if (progressPercent > 30) color = '#f59e0b'; // ส้ม (30-70%)
+
+                return {
+                    fillColor: color,
+                    weight: 1.5,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7
+                };
+            }
                     onEachFeature: function(feature, layer) {
                         // ดึงชื่ออำเภอจากฟิลด์ amphoe_th ในไฟล์ districts.json
                         const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";

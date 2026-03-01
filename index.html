@@ -64,103 +64,103 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        async function initDashboard() {
-            try {
-                // 1. โหลดข้อมูลจากไฟล์ JSON
-                const [dataRes, geoRes] = await Promise.all([
-                    fetch('data.json'),
-                    fetch('districts.json')
-                ]);
+<script>
+async function initDashboard() {
+    try {
+        // 1. โหลดข้อมูลโครงการและพิกัดแผนที่พร้อมกัน
+        const [dataRes, geoRes] = await Promise.all([
+            fetch('data.json?v=' + Date.now()),
+            fetch('districts.json?v=' + Date.now())
+        ]);
+
+        if (!dataRes.ok || !geoRes.ok) throw new Error("ไม่สามารถโหลดไฟล์ข้อมูลได้");
+
+        const projectData = await dataRes.json();
+        const geoData = await geoRes.json();
+
+        // 2. ตั้งค่าแผนที่ใน id="map" (พิกัดกลางเชียงใหม่)
+        const map = L.map('map').setView([18.7883, 98.9853], 8);
+        
+        // บังคับให้แผนที่คำนวณขนาดใหม่เพื่อให้แสดงผลเต็มกรอบ
+        setTimeout(() => { map.invalidateSize(); }, 500);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // 3. ฟังก์ชันกำหนดสี (Heat Map) ตามสถานะโครงการ
+        function getDistrictStyle(feature) {
+            // ดึงชื่ออำเภอจากไฟล์ districts.json (ฟิลด์ amphoe_th)
+            const dName = feature.properties.amphoe_th || "";
+            // กรองข้อมูลโครงการในอำเภอนั้น (ใช้ .includes เพื่อความแม่นยำ)
+            const districtProjects = projectData.filter(p => p.Districts && p.Districts.includes(dName));
+            
+            let color = '#f1f5f9'; // สีเทา (ไม่มีโครงการ)
+            if (districtProjects.length > 0) {
+                // เช็คว่ามีโครงการที่ "ลงนาม" หรือ "ดำเนินการ" หรือยัง
+                const isStarted = districtProjects.some(p => 
+                    p.Status.includes('ดำเนินการ') || p.Status.includes('ลงนาม') || p.Status.includes('GFMIS')
+                );
+                color = isStarted ? '#10b981' : '#f59e0b'; // เขียวถ้าเริ่มแล้ว, ส้มถ้ายังไม่เริ่ม
                 
-                if (!dataRes.ok || !geoRes.ok) throw new Error("โหลดไฟล์ JSON ไม่สำเร็จ");
-
-                const projectData = await dataRes.json();
-                const geoData = await geoRes.json();
-
-                // 2. ตั้งค่าแผนที่
-                const map = L.map('map').setView([18.7883, 98.9853], 8);
-                
-                // แก้ปัญหาแผนที่โหลดไม่เต็มกรอบ
-                setTimeout(() => { map.invalidateSize(); }, 500);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
-
-                // 3. วาดพื้นที่อำเภอลงในแผนที่
-                L.geoJSON(geoData, {
-              function getStyle(feature, projects) {
-                const dName = feature.properties.amphoe_th || feature.properties.NAME_2;
-                // กรองโครงการในอำเภอนี้
-                const districtProjects = projects.filter(p => p.Districts && p.Districts.includes(dName));
-    
-                if (districtProjects.length === 0) return { fillColor: '#f1f5f9', weight: 1, fillOpacity: 0.5, color: '#cbd5e1' };
-
-                // คำนวณความก้าวหน้า (เช่น ถ้ามี 'ลงนาม' หรือ 'ดำเนินการ' เกินครึ่งให้เป็นสีเขียว)
-                const completedCount = districtProjects.filter(p => 
-                    p.Status.includes('ลงนาม') || p.Status.includes('ดำเนินการ') || p.Status.includes('GFMIS')
-                ).length;
-    
-                const progressPercent = (completedCount / districtProjects.length) * 100;
-
-                // ไล่สีตามความก้าวหน้า
-                let color = '#ef4444'; // แดง (น้อยกว่า 30%)
-                if (progressPercent > 70) color = '#10b981'; // เขียว (มากกว่า 70%)
-                else if (progressPercent > 30) color = '#f59e0b'; // ส้ม (30-70%)
-
-                return {
-                    fillColor: color,
-                    weight: 1.5,
-                    opacity: 1,
-                    color: 'white',
-                    fillOpacity: 0.7
-                };
+                // ถ้ามีโครงการที่ "ยกเลิก" ให้เน้นสีแดงเข้ม
+                if (districtProjects.some(p => p.Status.includes('ยกเลิก'))) color = '#ef4444';
             }
-                    onEachFeature: function(feature, layer) {
-                        // ดึงชื่ออำเภอจากฟิลด์ amphoe_th ในไฟล์ districts.json
-                        const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";
-                        
-                        // แสดงชื่ออำเภอเมื่อเอาเมาส์วาง
-                        layer.bindTooltip("อำเภอ" + dName);
 
-                        // เมื่อคลิกที่อำเภอ
-                        layer.on('click', function() {
-                            const detailDiv = document.getElementById('detail-content');
-                            
-                            // กรองข้อมูลจาก data.json (อ้างอิงคอลัมน์ Districts)
-                            const filtered = projectData.filter(p => p.Districts && p.Districts.includes(dName));
-
-                            let html = `<h4 class="text-xl font-bold text-blue-900 mb-4">อำเภอ${dName}</h4>`;
-                            
-                            if (filtered.length === 0) {
-                                html += `<p class="text-gray-400">ไม่พบโครงการในพื้นที่นี้</p>`;
-                            } else {
-                                filtered.forEach(p => {
-                                    html += `
-                                        <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                                            <p class="font-bold text-blue-800 text-sm">${p.Project_Name}</p>
-                                            <p class="text-xs text-gray-600 mt-1">สถานะ: ${p.Status}</p>
-                                            <p class="text-xs font-bold text-emerald-600 mt-1">งบประมาณ: ${Number(p.Budget).toLocaleString()} บาท</p>
-                                        </div>
-                                    `;
-                                });
-                            }
-                            detailDiv.innerHTML = html;
-                        });
-                    }
-                }).addTo(map);
-
-                console.log("Dashboard Loaded Successfully");
-
-            } catch (err) {
-                console.error("แผนที่โหลดไม่สำเร็จ เพราะ:", err);
-                document.getElementById('map').innerHTML = `<div class="p-10 text-red-500 text-center">ไม่สามารถโหลดแผนที่ได้: ${err.message}</div>`;
-            }
+            return {
+                fillColor: color,
+                weight: 1.5,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.7
+            };
         }
 
-        // เรียกใช้ฟังก์ชันครั้งเดียวเมื่อหน้าเว็บพร้อม
-        window.addEventListener('load', initDashboard);
-    </script>
+        // 4. วาดแผนที่และใส่ฟังก์ชันคลิก
+        L.geoJSON(geoData, {
+            style: getStyle,
+            onEachFeature: function(feature, layer) {
+                const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";
+                layer.bindTooltip("อำเภอ" + dName);
+
+                layer.on('click', function() {
+                    const detailDiv = document.getElementById('detail-content');
+                    const filtered = projectData.filter(p => p.Districts && p.Districts.includes(dName));
+
+                    let html = `<h4 class="d-title">อำเภอ${dName}</h4>`;
+                    html += `<div class="d-chips">
+                                <div class="chip">ทั้งหมด <strong>${filtered.length}</strong> โครงการ</div>
+                             </div>`;
+                    
+                    if (filtered.length === 0) {
+                        html += `<div class="empty"><p>ไม่มีข้อมูลโครงการในพื้นที่นี้</p></div>`;
+                    } else {
+                        filtered.forEach(p => {
+                            html += `
+                                <div class="proj-group">
+                                    <div class="proj-head">
+                                        <div class="proj-name">${p.Project_Name}</div>
+                                        <div class="proj-budget">งบประมาณ: ${Number(p.Budget || 0).toLocaleString()} บาท</div>
+                                        <div class="text-[10px] mt-1 text-gray-500">สถานะ: ${p.Status}</div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                    detailDiv.innerHTML = html;
+                });
+            }
+        }).addTo(map);
+
+        console.log("Dashboard พร้อมใช้งาน");
+
+    } catch (err) {
+        console.error("แผนที่โหลดไม่สำเร็จ:", err);
+        document.getElementById('map').innerHTML = `<div class="empty"><p>ไม่สามารถโหลดแผนที่ได้: ${err.message}</p></div>`;
+    }
+}
+
+// เริ่มทำงานเมื่อหน้าเว็บพร้อม
+window.addEventListener('DOMContentLoaded', initDashboard);
+</script>
 </body>
 </html>

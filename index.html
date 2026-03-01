@@ -89,11 +89,11 @@ async function initDashboard() {
         }).addTo(map);
 
         // 3. ฟังก์ชันกำหนดสี (Heat Map) ตามสถานะโครงการ
-        function getDistrictStyle(feature) {
+        function getdistrictStyle(feature) {
             // ดึงชื่ออำเภอจากไฟล์ districts.json (ฟิลด์ amphoe_th)
             const dName = feature.properties.amphoe_th || "";
             // กรองข้อมูลโครงการในอำเภอนั้น (ใช้ .includes เพื่อความแม่นยำ)
-            const districtProjects = projectData.filter(p => p.Districts && p.Districts.includes(dName));
+            const districtProjects = projectData.filter(p => p.districts && p.districts.includes(dName));
             
             let color = '#f1f5f9'; // สีเทา (ไม่มีโครงการ)
             if (districtProjects.length > 0) {
@@ -125,7 +125,7 @@ async function initDashboard() {
 
                 layer.on('click', function() {
                     const detailDiv = document.getElementById('detail-content');
-                    const filtered = projectData.filter(p => p.Districts && p.Districts.includes(dName));
+                    const filtered = projectData.filter(p => p.districts && p.districts.includes(dName));
 
                     let html = `<h4 class="d-title">อำเภอ${dName}</h4>`;
                     html += `<div class="d-chips">

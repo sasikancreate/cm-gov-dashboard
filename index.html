@@ -92,7 +92,7 @@
             throw new Error(`โหลดไฟล์ไม่สำเร็จ: Data(${dataRes.status}) Districts(${geoRes.status})`);
             }
             const rawData = await dataRes.json();
-            const projectData = rawData.Sheet1;
+            const projectData = Array.isArray(rawData) ? rawData : rawData.Sheet1;
 
             const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
             document.getElementById('total-projects').innerText = uniqueProjects.length;

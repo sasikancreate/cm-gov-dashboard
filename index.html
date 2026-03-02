@@ -94,9 +94,10 @@
             document.getElementById('total-projects').innerText = uniqueProjects.length;
             document.getElementById('total-budget').innerText = "342,906,200";
 
-            const map = L.map('map').setView([18.7883, 98.9853], 8);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-            setTimeout(() => { map.invalidateSize(); }, 500);
+            const map = L.map('map', {
+                zoomSnap: 0.1,
+                attributionControl: false // ปิดโลโก้ Leaflet มุมขวาเพื่อให้คลีน
+            }).setView([18.82, 99.05], 8.3);
 
             L.geoJSON(geoData, {
                 style: function(feature) {
@@ -122,8 +123,13 @@
                         }, 0);
                         avg = total / projectsInDist.length;
                     }
-                    return { fillColor: getColor(avg), weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.8 };
-                },
+                    return { 
+                        fillColor: getColor(avg), 
+                        weight: 2,           // เส้นขอบหนาขึ้น
+                        opacity: 1, 
+                        color: 'white',      // เส้นขอบสีขาวตัดกับ Heat Map
+                        fillOpacity: 0.9     // สีทึบชัดเจนขึ้น
+                    };
                 onEachFeature: function(feature, layer) {
                     const dName = (feature.properties.amp_th || "ไม่ระบุ").trim();
                     layer.bindTooltip("อำเภอ" + dName);

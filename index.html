@@ -101,14 +101,12 @@
             const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
             document.getElementById('total-projects').innerText = uniqueProjects.length;
             document.getElementById('total-budget').innerText = "342,906,200";
-
+            
             const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.3);
             document.getElementById('map').style.backgroundColor = 'white';
-
-            // วาดแผนที่
+            
             const geoLayer = L.geoJSON(geoData, {
                 style: function(feature) {
-                    // ดึงชื่ออำเภอจากแผนที่ (ใช้ amphoe_t ตามไฟล์ของคุณ)
                     const dName = (feature.properties.amphoe_t || "").trim();
                     const projectsInDist = projectData.filter(p => 
                         p.Districts && p.Districts.replace('อำเภอ','').trim() === dName.replace('อำเภอ','').trim());
@@ -131,7 +129,7 @@
                     const dName = (feature.properties.amphoe_t || "ไม่ระบุ").trim();
                     layer.bindTooltip("อำเภอ " + dName);
                     
-                    layer.on('click', function() {
+                   layer.on('click', function() {
                         const cleanName = dName.replace('อำเภอ','').trim();
                         const filtered = projectData.filter(p => 
                             p.Districts && p.Districts.replace('อำเภอ','').trim() === cleanName);
@@ -146,11 +144,7 @@
                                 else if (s.includes("ยกเลิก")) { prog = 0; col = "#6C757D"; }
                                 
                                 groups[p.Project_Name] = { 
-                                    budget: p.Budget, 
-                                    status: s, 
-                                    unit: p.Responsible_Unit, 
-                                    progress: prog, 
-                                    color: col 
+                                    budget: p.Budget, status: s, unit: p.Responsible_Unit, progress: prog, color: col 
                                 };
                             }
                         });
@@ -161,7 +155,7 @@
 
                         let html = `
                             <div class="bg-slate-900 p-10 rounded-[40px] text-white shadow-xl flex flex-col md:flex-row justify-between items-center mb-8 gap-4 w-full text-left">
-                                <div><h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2><p class="opacity-60 text-sm">ข้อมูลโครงการประจำปี 2568</p></div>
+                                <div><h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2><p class="opacity-60 text-sm">ข้อมูลโครงการปี 2568</p></div>
                                 <div class="flex items-center gap-3"><span class="text-6xl font-black text-emerald-400">${avgDist}%</span><span class="text-xs font-bold opacity-60 leading-tight">ภาพรวม</span></div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 w-full text-left">
@@ -186,7 +180,7 @@
                                 </div>`;
                         });
                         html += `</div>`;
-                        openModal(html);
+                        openModal(html); // ฟังก์ชันเปิด Modal
                     });
                 }
             }).addTo(map);

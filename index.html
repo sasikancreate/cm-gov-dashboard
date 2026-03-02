@@ -91,8 +91,8 @@
             if (!dataRes.ok || !geoRes.ok) {
             throw new Error(`โหลดไฟล์ไม่สำเร็จ: Data(${dataRes.status}) Districts(${geoRes.status})`);
             }
-            const projectData = await dataRes.json();
-            const geoData = await geoRes.json();
+            const rawData = await dataRes.json();
+            const projectData = rawData.Sheet1;
 
             const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
             document.getElementById('total-projects').innerText = uniqueProjects.length;

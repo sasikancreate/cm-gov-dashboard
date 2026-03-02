@@ -84,8 +84,8 @@
     async function initDashboard() {
         try {
             const [dataRes, geoRes] = await Promise.all([
-                fetch('./data.json?v=' + Date.now()),
-                fetch('./districts.json?v=' + Date.now())
+                fetch('/data.json?v=' + Date.now()),
+                fetch('/districts.json?v=' + Date.now())
             ]);
             const projectData = await dataRes.json();
             const geoData = await geoRes.json();

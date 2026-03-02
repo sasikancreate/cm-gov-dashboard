@@ -133,6 +133,7 @@
                         const cleanName = dName.replace('อำเภอ','').trim();
                         const filtered = projectData.filter(p => 
                             p.Districts && p.Districts.replace('อำเภอ','').trim() === cleanName);
+                        
                         const groups = {};
                         filtered.forEach(p => {
                             if (!groups[p.Project_Name]) {

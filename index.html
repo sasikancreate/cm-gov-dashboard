@@ -116,17 +116,26 @@
                         layer.bindTooltip("อำเภอ" + dName);
 
                         // ฟังก์ชันเปิด Modal
-function openModal(htmlContent) {
-    document.getElementById('modal-body').innerHTML = htmlContent;
-    document.getElementById('project-modal').classList.remove('hidden');
-    document.body.style.overflow = 'hidden'; // ล็อกการสกロールหน้าเว็บหลัก
-}
+                        function openModal(htmlContent) {
+                            document.getElementById('modal-body').innerHTML = htmlContent;
+                            document.getElementById('project-modal').classList.remove('hidden');
+                            document.body.style.overflow = 'hidden'; // ล็อกการสกロールหน้าเว็บหลัก
+                        }
 
-// ฟังก์ชันปิด Modal
-function closeModal() {
-    document.getElementById('project-modal').classList.add('hidden');
-    document.body.style.overflow = 'auto'; // คืนค่าการสกロール
-}
+                        // ฟังก์ชันปิด Modal
+                        function closeModal() {
+                            const modal = document.getElementById('project-modal');
+                            modal.classList.add('hidden'); // ซ่อน Modal
+                            document.body.style.overflow = 'auto'; // คืนค่าให้หน้าเว็บหลักได้ตามปกติ
+                            <button onclick="closeModal()" class="absolute top-4 right-4 ...">
+                                <svg ...>ปุ่มกากบาท</svg>
+                            </button>
+
+                            <button onclick="closeModal()" class="px-8 py-2 bg-slate-800 ...">
+                                ปิด
+                            </button>
+                        }
+                        
 
 // ปรับในส่วน layer.on('click', ...)
 layer.on('click', function() {

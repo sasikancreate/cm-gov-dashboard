@@ -63,99 +63,95 @@
         </div>
     </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 async function initDashboard() {
     try {
-        // 1. โหลดข้อมูล (ใส่ Cache-Control เพื่อให้ข้อมูลสดใหม่เสมอ)
-        const [dataRes, geoRes] = await Promise.all([
-            fetch('data.json?v=' + Date.now()),
-            fetch('districts.json?v=' + Date.now())
-        ]);
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error("หาพื้นที่วาดแผนที่ id='map' ไม่เจอ");
+            return;
+        }
 
-        const projectData = await dataRes.json();
-        const geoData = await geoRes.json();
-
-        // 2. สร้างแผนที่
+        // 1. สร้างแผนที่รอก่อน (พิกัดเชียงใหม่)
         const map = L.map('map').setView([18.7883, 98.9853], 8);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // บังคับคำนวณขนาด (ป้องกันแผนที่แหว่ง)
+        // บังคับคำนวณขนาดกรอบแผนที่ใหม่ (กันปัญหาแผนที่แหว่ง)
         setTimeout(() => { map.invalidateSize(); }, 500);
 
-        // 3. ฟังก์ชันระบายสี Heat Map
-        function getStyle(feature) {
-            const dName = feature.properties.amphoe_th || "";
-            // ค้นหาว่าอำเภอนี้มีกี่โครงการ
-            const districtProjects = projectData.filter(p => p.Districts && p.Districts.includes(dName));
-            
-            return {
-                fillColor: districtProjects.length > 0 ? '#10b981' : '#cbd5e1', // เขียวถ้ามีงาน, เทาถ้าไม่มี
-                weight: 1.5,
-                opacity: 1,
-                color: 'white',
-                fillOpacity: 0.7
-            };
+        // 2. ดึงข้อมูลพิกัดอำเภอ (districts.json)
+        const geoRes = await fetch('./districts.json');
+        if (!geoRes.ok) throw new Error("โหลดไฟล์ districts.json ไม่สำเร็จ (เช็คชื่อไฟล์บน GitHub)");
+        const geoData = await geoRes.json();
+
+        // 3. ดึงข้อมูลโครงการจาก Sheet (data.json)
+        const dataRes = await fetch('./data.json');
+        let projectData = [];
+        if (dataRes.ok) {
+            projectData = await dataRes.json();
+            // อัปเดตตัวเลขสรุปด้านบนอัตโนมัติ
+            if (document.getElementById('total-projects')) {
+                document.getElementById('total-projects').innerText = projectData.length;
+            }
+        } else {
+            console.warn("โหลด data.json ไม่สำเร็จ แผนที่จะแสดงเฉพาะขอบเขตอำเภอ");
         }
 
-        // 4. วาดแผนที่และใส่ฟังก์ชันคลิก
+        // 4. วาดแผนที่อำเภอ
         L.geoJSON(geoData, {
-            style: getStyle,
-            onEachFeature: function(feature, layer) {
-                // ดึงชื่ออำเภอจากไฟล์พิกัด
-                const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";
+            style: function(feature) {
+                // อ้างอิงชื่ออำเภอจากไฟล์ districts.json (amphoe_th)
+                const dName = feature.properties.amphoe_th || "";
                 
-                // แสดงชื่ออำเภอสั้นๆ เมื่อเอาเมาส์วาง
+                // ค้นหาข้อมูลโครงการที่ตรงกับชื่ออำเภอนี้
+                const hasProject = projectData.some(p => p.Districts && p.Districts.includes(dName));
+
+                return {
+                    fillColor: hasProject ? '#10b981' : '#cbd5e1', // เขียวถ้ามีงาน, เทาถ้าไม่มี
+                    weight: 1.5,
+                    opacity: 1,
+                    color: 'white',
+                    fillOpacity: 0.7
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";
                 layer.bindTooltip("อำเภอ" + dName);
 
-                // เมื่อคลิกที่พื้นที่อำเภอ
                 layer.on('click', function() {
                     const detailDiv = document.getElementById('detail-content');
-                    
-                    // กรองข้อมูลโครงการที่ตรงกับชื่ออำเภอนี้
                     const filtered = projectData.filter(p => p.Districts && p.Districts.includes(dName));
 
-                    // สร้าง HTML สำหรับแสดงผลด้านขวา
-                    let html = `<h4 class="text-2xl font-bold text-blue-900 mb-2">อำเภอ${dName}</h4>`;
-                    html += `<p class="text-sm text-gray-500 mb-4 font-semibold">พบทั้งหมด ${filtered.length} โครงการ</p>`;
-                    html += `<hr class="mb-4 border-blue-100">`;
-
-                    if (filtered.length === 0) {
-                        html += `<div class="py-10 text-center text-gray-400 italic">ไม่มีข้อมูลโครงการในพื้นที่นี้</div>`;
-                    } else {
+                    let html = `<h4 class="text-xl font-bold text-blue-900 mb-2">อำเภอ${dName}</h4>`;
+                    if (filtered.length > 0) {
                         filtered.forEach(p => {
-                            // เลือกสีพื้นหลังตามสถานะ (ตัวอย่าง)
-                            const statusBg = p.Status.includes('ดำเนินการ') ? 'bg-emerald-50 border-emerald-200' : 'bg-blue-50 border-blue-200';
-                            
-                            html += `
-                                <div class="mb-4 p-4 rounded-xl border ${statusBg} shadow-sm">
-                                    <div class="text-xs font-bold text-blue-600 mb-1">${p.Project_ID || ''}</div>
-                                    <div class="font-bold text-gray-800 text-sm mb-2 leading-snug">${p.Project_Name}</div>
-                                    <div class="flex justify-between items-end mt-2">
-                                        <div class="text-[11px] text-gray-500">
-                                            <span class="block font-medium">สถานะ: ${p.Status}</span>
-                                            <span class="block">หน่วยงาน: ${p.Responsible_Unit || '-'}</span>
-                                        </div>
-                                        <div class="text-sm font-bold text-emerald-700">
-                                            ${Number(p.Budget || 0).toLocaleString()} ฿
-                                        </div>
-                                    </div>
-                                </div>`;
+                            html += `<div class="p-3 mb-2 bg-blue-50 border-l-4 border-blue-500 rounded text-sm">
+                                        <b>${p.Project_Name}</b><br>
+                                        <span class="text-xs text-gray-600">สถานะ: ${p.Status}</span>
+                                     </div>`;
                         });
+                    } else {
+                        html += `<p class="text-gray-400 italic">ไม่มีโครงการในพื้นที่นี้</p>`;
                     }
                     detailDiv.innerHTML = html;
                 });
             }
         }).addTo(map);
 
-        console.log("เชื่อมข้อมูลสำเร็จ!");
+        console.log("แผนที่และข้อมูลโครงการเชื่อมต่อสำเร็จ!");
 
     } catch (err) {
-        console.error("ผิดพลาด:", err);
+        console.error("เกิดข้อผิดพลาด:", err);
+        // แสดงข้อความแจ้งเตือนบนหน้าเว็บเพื่อให้คุณเห็นว่าติดตรงไหน
+        const mapErr = document.getElementById('map');
+        if (mapErr) mapErr.innerHTML = `<div class="p-10 text-red-500 text-center font-bold">ไม่สามารถโหลดแผนที่ได้: ${err.message}</div>`;
     }
 }
 
+// เรียกใช้งานเมื่อหน้าจอโหลดเสร็จ
 window.addEventListener('load', initDashboard);
 </script>
 </body>

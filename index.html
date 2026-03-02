@@ -74,11 +74,17 @@
                 const geoData = await geoRes.json();
 
                 // 2. อัปเดตตัวเลขสรุปอัตโนมัติ (ถ้ามีข้อมูล)
+                // อัปเดตตัวเลขสรุปอัตโนมัติ
                 if (Array.isArray(projectData)) {
-                    document.getElementById('total-projects').innerText = projectData.length;
-                    const total = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
-                    document.getElementById('total-budget').innerText = total.toLocaleString();
-                }
+                // กรองเฉพาะรายชื่อโครงการที่ไม่ซ้ำกัน
+                const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
+                document.getElementById('total-projects').innerText = uniqueProjects.length; // จะได้ 14 โครงการ
+    
+                // คำนวณงบประมาณ (ถ้างบประมาณใน JSON เป็นรายโครงการหลักอยู่แล้ว)
+                // แต่ถ้าใน JSON เป็นงบรายกิจกรรมย่อย ให้ระวังการบวกซ้ำนะครับ
+                const total = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
+                document.getElementById('total-budget').innerText = total.toLocaleString();
+            }
 
                 // 3. สร้างแผนที่
                 const map = L.map('map').setView([18.7883, 98.9853], 8);
@@ -98,33 +104,46 @@
                         };
                     },
                     onEachFeature: function(feature, layer) {
-                        const dName = feature.properties.amphoe_th || "ไม่ระบุ";
+                        // พยายามดึงชื่ออำเภอจากฟิลด์ต่างๆ ที่เป็นไปได้
+                        const dName = feature.properties.amphoe_th || feature.properties.NAME_2 || feature.properties.name || "ไม่ระบุชื่อ";
+    
                         layer.bindTooltip("อำเภอ" + dName);
 
                         layer.on('click', function() {
                             const detailDiv = document.getElementById('detail-content');
-                            const cleanName = dName.replace('อำเภอ', '');
-                            
-                            // กรองโครงการ
+                            const cleanName = dName.replace('อำเภอ', '').trim(); // ลบคำว่า 'อำเภอ' ออกเพื่อใช้เทียบข้อมูล
+        
+                            // กรองโครงการหลัก (โดยไม่นับกิจกรรมย่อยซ้ำ)
                             const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
+        
+                            // กรองเอาเฉพาะโครงการหลักที่ไม่ซ้ำชื่อกันเพื่อมาแสดงหัวข้อ
+                            const uniqueInDistrict = [];
+                            const map = new Map();
+                            for (const item of filtered) {
+                                if(!map.has(item.Project_Name)){
+                                    map.set(item.Project_Name, true);
+                                    uniqueInDistrict.push(item);
+                                }
+                            }
 
                             let html = `<h4 class="text-xl font-bold text-blue-900 mb-4">อำเภอ${dName}</h4>`;
-                            if (filtered.length === 0) {
+        
+                            if (uniqueInDistrict.length === 0) {
                                 html += `<p class="text-gray-400 italic">ไม่มีโครงการในพื้นที่นี้</p>`;
                             } else {
-                                filtered.forEach(p => {
+                                uniqueInDistrict.forEach(p => {
                                     html += `
-                                        <div class="proj-item">
+                                        <div class="proj-item" style="border-left: 4px solid #1a56a0; background: #f0f6ff; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
                                             <div class="font-bold text-sm text-gray-800">${p.Project_Name}</div>
-                                            <div class="text-xs text-blue-600 mt-1">งบประมาณ: ${Number(p.Budget || 0).toLocaleString()} บาท</div>
+                                            <div class="text-xs text-blue-600 mt-1 font-semibold">งบประมาณ: ${Number(p.Budget || 0).toLocaleString()} บาท</div>
                                             <div class="text-[10px] text-gray-500 mt-1">สถานะ: ${p.Status}</div>
+                                            <div class="text-[10px] text-gray-400 mt-1 italic">หน่วยงาน: ${p.Responsible_Unit}</div>
                                         </div>`;
                                 });
                             }
                             detailDiv.innerHTML = html;
                         });
                     }
-                }).addTo(map);
 
             } catch (err) {
                 console.error("ผิดพลาด:", err);

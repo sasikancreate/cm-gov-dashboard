@@ -117,28 +117,42 @@ async function initDashboard() {
                     fillOpacity: 0.7
                 };
             },
-            onEachFeature: function(feature, layer) {
-                const dName = feature.properties.amphoe_th || "ไม่ระบุชื่อ";
-                layer.bindTooltip("อำเภอ" + dName);
+          onEachFeature: function(feature, layer) {
+            // 1. ดึงชื่ออำเภอจากไฟล์แผนที่
+            const dName = feature.properties.amphoe_th || feature.properties.NAME_2 || "ไม่ระบุชื่อ";
+    
+            // 2. แสดงชื่อเมื่อเอาเมาส์วาง (Tooltip)
+            layer.bindTooltip("อำเภอ" + dName);
 
-                layer.on('click', function() {
-                    const detailDiv = document.getElementById('detail-content');
-                    const filtered = projectData.filter(p => p.Districts && p.Districts.includes(dName));
+            // 3. เมื่อคลิกที่อำเภอ
+            layer.on('click', function() {
+                const detailDiv = document.getElementById('detail-content');
+        
+                // กรองโครงการจาก data.json โดยเทียบชื่ออำเภอ
+                // เราใช้ .replace('อำเภอ', '') เพื่อให้ "อำเภอฝาง" กับ "ฝาง" ตรงกัน
+                const filtered = projectData.filter(p => 
+                    p.Districts && p.Districts.replace('อำเภอ','').includes(dName.replace('อำเภอ',''))
+                );
 
-                    let html = `<h4 class="text-xl font-bold text-blue-900 mb-2">อำเภอ${dName}</h4>`;
-                    if (filtered.length > 0) {
-                        filtered.forEach(p => {
-                            html += `<div class="p-3 mb-2 bg-blue-50 border-l-4 border-blue-500 rounded text-sm">
-                                        <b>${p.Project_Name}</b><br>
-                                        <span class="text-xs text-gray-600">สถานะ: ${p.Status}</span>
-                                     </div>`;
-                        });
-                    } else {
-                        html += `<p class="text-gray-400 italic">ไม่มีโครงการในพื้นที่นี้</p>`;
-                    }
-                    detailDiv.innerHTML = html;
-                });
-            }
+                // แสดงชื่ออำเภอในช่องรายละเอียด
+                let html = `<div class="d-title">อำเภอ${dName}</div>`;
+                html += `<div class="mb-4 text-sm text-blue-600 font-bold">โครงการทั้งหมด ${filtered.length} รายการ</div>`;
+
+                if (filtered.length === 0) {
+                    html += `<div class="empty"><p>ไม่มีข้อมูลโครงการในพื้นที่นี้</p></div>`;
+                } else {
+                    filtered.forEach(p => {
+                        html += `
+                            <div class="proj-group" style="border-left: 4px solid #1a56a0; background: #f0f6ff; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                                <div class="proj-name" style="font-weight: bold; font-size: 14px;">${p.Project_Name}</div>
+                                <div class="proj-budget" style="color: #10a97a; font-size: 12px; margin-top: 4px;">งบประมาณ: ${Number(p.Budget || 0).toLocaleString()} บาท</div>
+                                <div style="font-size: 11px; color: #5a7090; margin-top: 4px;">สถานะ: ${p.Status}</div>
+                            </div>`;
+                    });
+                }
+                detailDiv.innerHTML = html;
+            });
+        }
         }).addTo(map);
 
         console.log("แผนที่และข้อมูลโครงการเชื่อมต่อสำเร็จ!");

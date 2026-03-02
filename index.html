@@ -14,7 +14,6 @@
         #map { height: 600px; width: 100%; background: white; border-radius: 24px; z-index: 10; border: 1px solid #e2e8f0; }
         .stat-card { transition: all 0.3s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        /* สไตล์สำหรับ Legend */
         .info.legend { padding: 15px; font-size: 12px; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 15px; line-height: 20px; color: #334155; border: 1px solid #e2e8f0; }
         .info.legend i { width: 18px; height: 18px; float: left; margin-right: 10px; opacity: 0.9; border-radius: 4px; }
         .legend-title { font-weight: 700; margin-bottom: 8px; color: #1e293b; }
@@ -98,7 +97,6 @@
             document.getElementById('total-projects').innerText = uniqueProjects.length;
             document.getElementById('total-budget').innerText = "342,906,200";
 
-            // สร้างแผนที่ (ไม่มี TileLayer เพื่อให้พื้นหลังขาว)
             const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.3);
             
             L.geoJSON(geoData, {
@@ -125,7 +123,7 @@
                         avg = total / projectsInDist.length;
                     }
                     return { fillColor: getColor(avg), weight: 2, opacity: 1, color: 'white', fillOpacity: 0.9 };
-                },
+                }, // <-- เพิ่มปีกกาปิด style ตรงนี้
                 onEachFeature: function(feature, layer) {
                     const dName = (feature.properties.amp_th || "ไม่ระบุ").trim();
                     layer.bindTooltip("อำเภอ" + dName);
@@ -174,7 +172,6 @@
                 }
             }).addTo(map);
 
-            // เพิ่ม Legend
             const legend = L.control({ position: 'bottomright' });
             legend.onAdd = function () {
                 const div = L.DomUtil.create('div', 'info legend');

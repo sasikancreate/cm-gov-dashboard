@@ -104,35 +104,85 @@
 
                         layer.on('click', function() {
                             const detailDiv = document.getElementById('detail-content');
-                            // กรองโครงการโดยเทียบชื่ออำเภอ (ตัดคำว่า 'อำเภอ' ออกจากข้อมูลใน Sheet ถ้ามี)
-                            const filtered = projectData.filter(p => 
-                                p.Districts && p.Districts.replace('อำเภอ', '').trim().includes(dName.trim())
-                            );
+                            const cleanName = dName.replace('อำเภอ', '').trim();
+    
+                            // กรองข้อมูลกิจกรรมย่อย
+                            const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
 
-                            // ยุบรวมกิจกรรมย่อยให้โชว์ตามโครงการหลัก
+                            // ยุบรวมข้อมูลเป็นโครงการหลักเพื่อแสดงผลสถิติ
                             const groups = {};
                             filtered.forEach(p => {
                                 if (!groups[p.Project_Name]) {
-                                    groups[p.Project_Name] = { budget: p.Budget, status: p.Status, unit: p.Responsible_Unit };
+                                    groups[p.Project_Name] = { 
+                                        budget: Number(p.Budget || 0), 
+                                        status: p.Status, 
+                                        unit: p.Responsible_Unit,
+                                        progress: p.Status.includes('สำเร็จ') ? 100 : (p.Status.includes('ดำเนินการ') ? 50 : 10) // สมมติค่า % ตามสถานะ
+                                    };
                                 }
                             });
 
-                            let html = `<h4 class="text-xl font-bold text-blue-900 mb-4 border-b-2 border-blue-100 pb-2">อำเภอ${dName}</h4>`;
-                            const keys = Object.keys(groups);
-                            
-                            if (keys.length === 0) {
-                                html += `<div class="py-10 text-center text-gray-400">ไม่พบโครงการในพื้นที่นี้</div>`;
+                            const projectKeys = Object.keys(groups);
+                            const totalDistBudget = Object.values(groups).reduce((s, p) => s + p.budget, 0);
+                            const avgProgress = projectKeys.length > 0 ? Math.round(Object.values(groups).reduce((s, p) => s + p.progress, 0) / projectKeys.length) : 0;
+
+                            // เริ่มสร้างหน้าตาตามภาพตัวอย่าง
+                            let html = `
+                                <div class="mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800">อำเภอ${dName}</h2>
+                                    <p class="text-xs text-gray-500">ข้อมูลโครงการตามแผนปฏิบัติราชการ ปีงบประมาณ พ.ศ. 2568</p>
+                                </div>
+
+                                <div class="flex gap-3 mb-8">
+                                    <div class="district-stat-card bg-blue-50 border-blue-100">
+                                        <div class="text-[10px] text-blue-600 font-bold uppercase">จำนวนโครงการ</div>
+                                        <div class="text-xl font-black text-blue-900">${projectKeys.length}</div>
+                                    </div>
+                                    <div class="district-stat-card bg-emerald-50 border-emerald-100">
+                                        <div class="text-[10px] text-emerald-600 font-bold uppercase">งบประมาณรวม</div>
+                                        <div class="text-lg font-black text-emerald-900">฿${totalDistBudget.toLocaleString()}</div>
+                                    </div>
+                                    <div class="district-stat-card bg-purple-50 border-purple-100">
+                                        <div class="text-[10px] text-purple-600 font-bold uppercase">ความคืบหน้าเฉลี่ย</div>
+                                        <div class="text-xl font-black text-purple-900">${avgProgress}%</div>
+                                    </div>
+                                </div>
+
+                                <h3 class="font-bold text-gray-700 mb-4 flex items-center gap-2">รายละเอียดโครงการ</h3>
+    `                        ;
+
+                            if (projectKeys.length === 0) {
+                                html += `<div class="py-20 text-center text-gray-400 italic border rounded-xl">ไม่พบข้อมูลโครงการในพื้นที่นี้</div>`;
                             } else {
-                                keys.forEach(name => {
+                                projectKeys.forEach((name, index) => {
                                     const p = groups[name];
                                     html += `
-                                        <div class="proj-item shadow-sm">
-                                            <div class="font-bold text-sm text-gray-800 leading-tight mb-2">${name}</div>
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">${p.status}</span>
-                                                <span class="text-sm font-bold text-emerald-600">${Number(p.budget || 0).toLocaleString()} ฿</span>
+                                        <div class="mb-4 p-5 rounded-2xl border border-gray-100 bg-white shadow-sm">
+                                            <div class="flex items-start gap-3">
+                                                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                                    ${index + 1}
+                                                </div>
+                                                <div class="flex-1">
+                                                    <div class="flex justify-between items-start mb-1">
+                                                        <h4 class="font-bold text-sm text-gray-800 leading-snug">${name}</h4>
+                                                        <span class="text-xs font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700">${p.progress}%</span>
+                                                    </div>
+                                                    <div class="grid grid-cols-2 gap-2 mt-4 text-[11px] text-gray-500">
+                                                        <div><span class="block text-gray-400">ผู้ดำเนินงานหลัก</span><b>${p.unit}</b></div>
+                                                        <div><span class="block text-gray-400">งบประมาณ</span><b class="text-gray-700 text-xs">฿${p.budget.toLocaleString()}</b></div>
+                                                    </div>
+                            
+                                                    <div class="mt-4">
+                                                        <div class="flex justify-between text-[10px] mb-1">
+                                                            <span>ความคืบหน้า</span>
+                                                            <span>${p.progress}%</span>
+                                                        </div>
+                                                        <div class="progress-bar">
+                                                                <div class="progress-fill" style="width: ${p.progress}%"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="text-[10px] text-gray-400 mt-2 italic">หน่วยงาน: ${p.unit}</div>
                                         </div>`;
                                 });
                             }

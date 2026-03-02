@@ -115,18 +115,30 @@
                         const dName = feature.properties.amp_th || "ไม่ระบุชื่อ";
                         layer.bindTooltip("อำเภอ" + dName);
 
-                        layer.on('click', function() {
-    const detailDiv = document.getElementById('detail-content');
+                        // ฟังก์ชันเปิด Modal
+function openModal(htmlContent) {
+    document.getElementById('modal-body').innerHTML = htmlContent;
+    document.getElementById('project-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; // ล็อกการสกロールหน้าเว็บหลัก
+}
+
+// ฟังก์ชันปิด Modal
+function closeModal() {
+    document.getElementById('project-modal').classList.add('hidden');
+    document.body.style.overflow = 'auto'; // คืนค่าการสกロール
+}
+
+// ปรับในส่วน layer.on('click', ...)
+layer.on('click', function() {
     const cleanName = dName.replace('อำเภอ', '').trim();
     const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
 
     const groups = {};
     filtered.forEach(p => {
         if (!groups[p.Project_Name]) {
-            // Logic กำหนด % และ สี ตามเงื่อนไข 10 ข้อ
-            let prog = 10; let col = "#EF9A9A"; // ค่าเริ่มต้น: อยู่ระหว่างอนุมัติโครงการ
+            let prog = 10; let col = "#EF9A9A"; 
             const s = p.Status || "";
-
+            // ... (Logic การเช็ค Status 10 ข้อของคุณเหมือนเดิม) ...
             if (s.includes("GFMIS")) { prog = 100; col = "#28A745"; }
             else if (s.includes("ลงนามแล้วอยู่ระหว่างนำเข้า")) { prog = 90; col = "#85C88A"; }
             else if (s.includes("ประกาศผลผู้ชนะ")) { prog = 80; col = "#A7D948"; }
@@ -152,68 +164,58 @@
     const totalDistBudget = Object.values(groups).reduce((s, p) => s + p.budget, 0);
     const avgProgress = projectKeys.length > 0 ? Math.round(Object.values(groups).reduce((s, p) => s + p.progress, 0) / projectKeys.length) : 0;
 
-    let html = `
-        <div class="mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">อำเภอ${dName}</h2>
-            <p class="text-[11px] text-gray-400 font-medium">ข้อมูลโครงการตามแผนปฏิบัติราชการ ปีงบประมาณ พ.ศ. 2568</p>
-        </div>
-
-        <div class="flex gap-2 mb-8">
-            <div class="district-stat-card bg-blue-50 border-blue-100">
-                <div class="text-[9px] text-blue-600 font-bold uppercase">จำนวนโครงการ</div>
-                <div class="text-xl font-black text-blue-900">${projectKeys.length}</div>
+    // สร้าง HTML สำหรับใส่ใน Modal
+    let modalHtml = `
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-emerald-800 p-8 rounded-3xl text-white shadow-lg">
+            <div>
+                <h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2>
+                <p class="opacity-80">ข้อมูลโครงการตามแผนปฏิบัติราชการ ปีงบประมาณ พ.ศ. 2568</p>
             </div>
-            <div class="district-stat-card bg-emerald-50 border-emerald-100">
-                <div class="text-[9px] text-emerald-600 font-bold uppercase">งบประมาณรวม</div>
-                <div class="text-lg font-black text-emerald-900">฿${totalDistBudget.toLocaleString()}</div>
-            </div>
-            <div class="district-stat-card bg-purple-50 border-purple-100">
-                <div class="text-[9px] text-purple-600 font-bold uppercase">ผลการดำเนินงาน</div>
-                <div class="text-xl font-black text-purple-900">${avgProgress}%</div>
+            <div class="flex items-center gap-2">
+                <span class="text-5xl font-black">${avgProgress}%</span>
+                <span class="text-sm font-bold opacity-80 leading-tight">ผลการดำเนินงาน<br>ภาพรวม</span>
             </div>
         </div>
 
-        <h3 class="font-bold text-gray-700 mb-4 text-sm flex items-center gap-2">📑 รายละเอียดโครงการ</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-2xl border-2 border-blue-50 flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-xl text-blue-600 font-black text-2xl">${projectKeys.length}</div>
+                <div><p class="text-xs text-gray-400 font-bold uppercase">จำนวนโครงการ</p><p class="font-bold text-gray-700 text-lg">รายการโครงการทั้งหมด</p></div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border-2 border-emerald-50 flex items-center gap-4">
+                <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600 font-black text-lg">฿</div>
+                <div><p class="text-xs text-gray-400 font-bold uppercase">งบประมาณรวม</p><p class="font-bold text-gray-700 text-lg">${totalDistBudget.toLocaleString()} บาท</p></div>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-gray-800 mb-6">รายการโครงการในพื้นที่</h3>
+        <div class="grid grid-cols-1 gap-6">
     `;
 
-    if (projectKeys.length === 0) {
-        html += `<div class="py-20 text-center text-gray-400 italic border border-dashed rounded-2xl">ไม่พบข้อมูลโครงการในพื้นที่นี้</div>`;
-    } else {
-        projectKeys.forEach((name, index) => {
-            const p = groups[name];
-            html += `
-                <div class="mb-4 p-5 rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <div class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0">
-                            ${index + 1}
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex justify-between items-start mb-2">
-                                <h4 class="font-bold text-sm text-gray-800 leading-snug pr-2">${name}</h4>
-                                <span class="text-[10px] font-bold px-2 py-0.5 rounded text-white" style="background-color: ${p.color}">
-                                    ${p.progress}%
-                                </span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4 mt-4 text-[11px]">
-                                <div><span class="text-gray-400 block mb-0.5">ผู้ดำเนินงาน</span><b class="text-gray-600">${p.unit}</b></div>
-                                <div><span class="text-gray-400 block mb-0.5">งบประมาณ</span><b class="text-gray-900">฿${p.budget.toLocaleString()}</b></div>
-                            </div>
-                            
-                            <div class="mt-5">
-                                <div class="flex justify-between text-[10px] mb-1.5 font-bold">
-                                    <span class="text-gray-400">ผลการดำเนินงาน</span>
-                                    <span style="color: ${p.color}">${p.status}</span>
-                                </div>
-                                <div class="progress-bar-container">
-                                    <div class="progress-bar-fill" style="width: ${p.progress}%; background-color: ${p.color}"></div>
-                                </div>
-                            </div>
-                        </div>
+    projectKeys.forEach((name, index) => {
+        const p = groups[name];
+        modalHtml += `
+            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl font-bold flex-shrink-0">${index + 1}</div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-bold text-gray-800 mb-4">${name}</h4>
+                    <div class="flex flex-wrap gap-6 text-sm text-gray-500 mb-6">
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span>ผู้ดำเนินงาน: <b>${p.unit}</b></div>
+                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span>งบประมาณ: <b class="text-gray-800">฿${p.budget.toLocaleString()}</b></div>
                     </div>
-                </div>`;
-        });
-    }
-    detailDiv.innerHTML = html;
+                    <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                        <div class="h-full transition-all duration-1000" style="width: ${p.progress}%; background-color: ${p.color}"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs font-bold">
+                        <span class="text-gray-400">สถานะ: ${p.status}</span>
+                        <span style="color: ${p.color}">${p.progress}%</span>
+                    </div>
+                </div>
+            </div>`;
+    });
+
+    modalHtml += `</div>`;
+    openModal(modalHtml); // เรียกใช้งาน Popup
 });
                     }
                 }).addTo(map);

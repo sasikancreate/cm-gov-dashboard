@@ -10,69 +10,76 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f8fafc; }
-        #map { height: 550px; width: 100%; background: #f1f5f9; border-radius: 12px; z-index: 10; border: 1px solid #e2e8f0; }
+        #map { height: 600px; width: 100%; background: #f1f5f9; border-radius: 24px; z-index: 10; border: 1px solid #e2e8f0; }
         .stat-card { transition: all 0.3s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .proj-item { border-left: 4px solid #1e40af; background: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 12px; shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
     </style>
 </head>
 <body class="p-4 md:p-8">
-    <div id="project-modal" class="fixed inset-0 z-[2000] hidden bg-black bg-opacity-50 flex items-center justify-center p-4">
-    <div class="w-full bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-    <h3 class="text-xl font-bold mb-6 text-gray-700 flex items-center gap-2">
-        <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-        แผนที่แสดงผลรายอำเภอ (Heat Map)
-    </h3>
-    <div id="map" class="rounded-2xl"></div>
-</div>
-        
-        <div class="p-4 bg-white border-t flex justify-end">
-            <button onclick="closeModal()" class="px-8 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-700 transition-all">ปิด</button>
+
+    <div id="project-modal" class="fixed inset-0 z-[9999] hidden bg-black bg-opacity-60 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-5xl max-h-[90vh] rounded-[40px] overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in duration-300">
+            <button onclick="closeModal()" class="absolute top-6 right-6 z-50 p-2 bg-white/80 hover:bg-gray-200 rounded-full shadow-md transition-all">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div id="modal-body" class="overflow-y-auto p-6 md:p-12 bg-slate-50"></div>
+            <div class="p-4 bg-white border-t flex justify-center">
+                <button onclick="closeModal()" class="px-12 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-700 shadow-lg transition-all">ปิดหน้าต่าง</button>
+            </div>
         </div>
     </div>
-</div>
+
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl md:text-3xl font-bold text-center text-blue-900 mb-8">
-            ต้นแบบ Dashboard ติดตามผลการดำเนินงานตามแผนปฏิบัติราชการ ปีงบประมาณ พ.ศ. 2568
+        <h1 class="text-2xl md:text-4xl font-black text-center text-slate-900 mb-10 tracking-tight">
+            Dashboard ติดตามแผนปฏิบัติราชการเชียงใหม่ 2568
         </h1>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-500 text-center">
-                <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">จำนวนโครงการหลัก</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">จำนวนโครงการหลัก</p>
                 <div class="flex items-baseline justify-center gap-2">
-                    <span id="total-projects" class="text-4xl font-black text-blue-900">0</span>
-                    <span class="text-lg text-gray-600 font-semibold">โครงการ</span>
+                    <span id="total-projects" class="text-5xl font-black text-blue-600">0</span>
+                    <span class="text-xl text-slate-400 font-bold">โครงการ</span>
                 </div>
             </div>
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500 text-center">
-                <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">งบประมาณรวม</p>
+            <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">งบประมาณรวมทั้งสิ้น</p>
                 <div class="flex items-baseline justify-center gap-2">
-                    <span id="total-budget" class="text-4xl font-black text-emerald-700">342,906,200</span>
-                    <span class="text-lg text-gray-600 font-semibold">บาท</span>
+                    <span id="total-budget" class="text-5xl font-black text-emerald-600">0</span>
+                    <span class="text-xl text-slate-400 font-bold">บาท</span>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <h3 class="text-lg font-bold mb-4 text-gray-700 flex items-center gap-2">
-                    <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
-                    แผนที่แสดงผลรายอำเภอ (Heat Map)
-                </h3>
-                <div id="map"></div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-y-auto" style="max-height: 610px;">
-                <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">รายละเอียดโครงการ</h3>
-                <div id="detail-content" class="text-gray-500 text-center py-20 italic">
-                    กรุณาคลิกเลือกอำเภอในแผนที่<br>เพื่อดูรายละเอียด
-                </div>
-            </div>
+        <div class="w-full bg-white p-6 rounded-[40px] shadow-sm border border-slate-100">
+            <h3 class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-3">
+                <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                แผนที่แสดงผลรายอำเภอ (Heat Map)
+            </h3>
+            <div id="map"></div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // --- ฟังก์ชันควบคุม Modal ---
+        function openModal(htmlContent) {
+            document.getElementById('modal-body').innerHTML = htmlContent;
+            document.getElementById('project-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // ปิด Modal เมื่อคลิกพื้นหลัง
+        window.onclick = function(event) {
+            const modal = document.getElementById('project-modal');
+            if (event.target == modal) closeModal();
+        }
+
         async function initDashboard() {
             try {
                 const [dataRes, geoRes] = await Promise.all([
@@ -85,16 +92,10 @@
                 const projectData = await dataRes.json();
                 const geoData = await geoRes.json();
 
-                // 1. สรุปจำนวนโครงการหลัก (Unique Project Name)
-                if (Array.isArray(projectData)) {
-                    const uniqueNames = [...new Set(projectData.map(p => p.Project_Name))];
-                    document.getElementById('total-projects').innerText = uniqueNames.length;
-                    
-                    const totalB = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
-                    // หมายเหตุ: ถ้างบประมาณในไฟล์ซ้ำกันตามกิจกรรมย่อย ตัวเลขอาจจะสูงกว่าความเป็นจริง
-                    // หากต้องการใช้ค่าคงที่ ให้แก้บรรทัดล่างเป็น .innerText = "342,906,200";
-                    document.getElementById('total-budget').innerText = totalB.toLocaleString();
-                }
+                // 1. สรุปตัวเลข
+                const uniqueNames = [...new Set(projectData.map(p => p.Project_Name))];
+                document.getElementById('total-projects').innerText = uniqueNames.length;
+                document.getElementById('total-budget').innerText = "342,906,200";
 
                 // 2. สร้างแผนที่
                 const map = L.map('map').setView([18.7883, 98.9853], 8);
@@ -115,117 +116,92 @@
                         const dName = feature.properties.amp_th || "ไม่ระบุชื่อ";
                         layer.bindTooltip("อำเภอ" + dName);
 
-                        // ฟังก์ชันเปิด Modal
-                        function openModal(htmlContent) {
-                            document.getElementById('modal-body').innerHTML = htmlContent;
-                            document.getElementById('project-modal').classList.remove('hidden');
-                            document.body.style.overflow = 'hidden'; // ล็อกการสกロールหน้าเว็บหลัก
-                        }
+                        layer.on('click', function() {
+                            const cleanName = dName.replace('อำเภอ', '').trim();
+                            const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
 
-                        // ฟังก์ชันปิด Modal
-                        function closeModal() {
-                            const modal = document.getElementById('project-modal');
-                            modal.classList.add('hidden'); // ซ่อน Modal
-                            document.body.style.overflow = 'auto'; // คืนค่าให้หน้าเว็บหลักได้ตามปกติ
-                            <button onclick="closeModal()" class="absolute top-4 right-4 ...">
-                                <svg ...>ปุ่มกากบาท</svg>
-                            </button>
+                            const groups = {};
+                            filtered.forEach(p => {
+                                if (!groups[p.Project_Name]) {
+                                    let prog = 10; let col = "#EF9A9A"; 
+                                    const s = p.Status || "";
+                                    if (s.includes("GFMIS")) { prog = 100; col = "#28A745"; }
+                                    else if (s.includes("ลงนามแล้วอยู่ระหว่างนำเข้า")) { prog = 90; col = "#85C88A"; }
+                                    else if (s.includes("ประกาศผลผู้ชนะ")) { prog = 80; col = "#A7D948"; }
+                                    else if (s.includes("อุทธรณ์ผล")) { prog = 70; col = "#F4D03F"; }
+                                    else if (s.includes("ประกาศเชิญชวน")) { prog = 60; col = "#FFF176"; }
+                                    else if (s.includes("ดำเนินการ (In Progress)")) { prog = 50; col = "#FFB74D"; }
+                                    else if (s.includes("รอการอนุมัติรายงานขอซื้อ")) { prog = 30; col = "#FF8A65"; }
+                                    else if (s.includes("ร่างขอบเขตงาน") || s.includes("TOR")) { prog = 20; col = "#E57373"; }
+                                    else if (s.includes("อนุมัติโครงการ")) { prog = 10; col = "#EF9A9A"; }
+                                    else if (s.includes("ยกเลิก")) { prog = 0; col = "#6C757D"; }
 
-                            <button onclick="closeModal()" class="px-8 py-2 bg-slate-800 ...">
-                                ปิด
-                            </button>
-                        }
-                        
+                                    groups[p.Project_Name] = { 
+                                        budget: Number(p.Budget || 0), 
+                                        status: s, 
+                                        unit: p.Responsible_Unit,
+                                        progress: prog,
+                                        color: col
+                                    };
+                                }
+                            });
 
-// ปรับในส่วน layer.on('click', ...)
-layer.on('click', function() {
-    const cleanName = dName.replace('อำเภอ', '').trim();
-    const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
+                            const projectKeys = Object.keys(groups);
+                            const totalDistBudget = Object.values(groups).reduce((s, p) => s + p.budget, 0);
+                            const avgProgress = projectKeys.length > 0 ? Math.round(Object.values(groups).reduce((s, p) => s + p.progress, 0) / projectKeys.length) : 0;
 
-    const groups = {};
-    filtered.forEach(p => {
-        if (!groups[p.Project_Name]) {
-            let prog = 10; let col = "#EF9A9A"; 
-            const s = p.Status || "";
-            // ... (Logic การเช็ค Status 10 ข้อของคุณเหมือนเดิม) ...
-            if (s.includes("GFMIS")) { prog = 100; col = "#28A745"; }
-            else if (s.includes("ลงนามแล้วอยู่ระหว่างนำเข้า")) { prog = 90; col = "#85C88A"; }
-            else if (s.includes("ประกาศผลผู้ชนะ")) { prog = 80; col = "#A7D948"; }
-            else if (s.includes("อุทธรณ์ผล")) { prog = 70; col = "#F4D03F"; }
-            else if (s.includes("ประกาศเชิญชวน")) { prog = 60; col = "#FFF176"; }
-            else if (s.includes("ดำเนินการ (In Progress)")) { prog = 50; col = "#FFB74D"; }
-            else if (s.includes("รอการอนุมัติรายงานขอซื้อ")) { prog = 30; col = "#FF8A65"; }
-            else if (s.includes("ร่างขอบเขตงาน") || s.includes("TOR")) { prog = 20; col = "#E57373"; }
-            else if (s.includes("อนุมัติโครงการ")) { prog = 10; col = "#EF9A9A"; }
-            else if (s.includes("ยกเลิก")) { prog = 0; col = "#6C757D"; }
+                            let modalHtml = `
+                                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-slate-900 p-10 rounded-[40px] text-white shadow-xl">
+                                    <div>
+                                        <h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2>
+                                        <p class="opacity-60 text-sm tracking-wide">รายงานความคืบหน้าโครงการประจำปี 2568</p>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-6xl font-black text-emerald-400">${avgProgress}%</span>
+                                        <span class="text-xs font-bold opacity-60 leading-tight">ผลการดำเนินงาน<br>ภาพรวม</span>
+                                    </div>
+                                </div>
 
-            groups[p.Project_Name] = { 
-                budget: Number(p.Budget || 0), 
-                status: s, 
-                unit: p.Responsible_Unit,
-                progress: prog,
-                color: col
-            };
-        }
-    });
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6 shadow-sm">
+                                        <div class="p-4 bg-blue-50 rounded-2xl text-blue-600 font-black text-3xl">${projectKeys.length}</div>
+                                        <div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">โครงการ</p><p class="font-bold text-slate-800 text-xl">รายการทั้งหมด</p></div>
+                                    </div>
+                                    <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6 shadow-sm">
+                                        <div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 font-black text-2xl">฿</div>
+                                        <div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">งบประมาณ</p><p class="font-bold text-slate-800 text-xl">${totalDistBudget.toLocaleString()} บาท</p></div>
+                                    </div>
+                                </div>
 
-    const projectKeys = Object.keys(groups);
-    const totalDistBudget = Object.values(groups).reduce((s, p) => s + p.budget, 0);
-    const avgProgress = projectKeys.length > 0 ? Math.round(Object.values(groups).reduce((s, p) => s + p.progress, 0) / projectKeys.length) : 0;
+                                <h3 class="text-xl font-black text-slate-800 mb-6 px-2">รายการโครงการในพื้นที่</h3>
+                                <div class="grid grid-cols-1 gap-4">
+                            `;
 
-    // สร้าง HTML สำหรับใส่ใน Modal
-    let modalHtml = `
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 bg-emerald-800 p-8 rounded-3xl text-white shadow-lg">
-            <div>
-                <h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2>
-                <p class="opacity-80">ข้อมูลโครงการตามแผนปฏิบัติราชการ ปีงบประมาณ พ.ศ. 2568</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="text-5xl font-black">${avgProgress}%</span>
-                <span class="text-sm font-bold opacity-80 leading-tight">ผลการดำเนินงาน<br>ภาพรวม</span>
-            </div>
-        </div>
+                            projectKeys.forEach((name, index) => {
+                                const p = groups[name];
+                                modalHtml += `
+                                    <div class="bg-white p-8 rounded-[32px] border border-slate-50 flex flex-col md:flex-row gap-6 items-center shadow-sm">
+                                        <div class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-300 flex items-center justify-center text-xl font-black flex-shrink-0">${index + 1}</div>
+                                        <div class="flex-1 w-full">
+                                            <h4 class="text-lg font-bold text-slate-800 mb-4">${name}</h4>
+                                            <div class="flex flex-wrap gap-6 text-xs text-slate-500 mb-6">
+                                                <div class="flex items-center gap-2">หน่วยงาน: <b class="text-slate-700">${p.unit}</b></div>
+                                                <div class="flex items-center gap-2">งบประมาณ: <b class="text-slate-900">฿${p.budget.toLocaleString()}</b></div>
+                                            </div>
+                                            <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-3">
+                                                <div class="h-full transition-all duration-1000" style="width: ${p.progress}%; background-color: ${p.color}"></div>
+                                            </div>
+                                            <div class="flex justify-between text-[10px] font-black tracking-widest uppercase">
+                                                <span class="text-slate-400">สถานะ: ${p.status}</span>
+                                                <span style="color: ${p.color}">${p.progress}%</span>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                            });
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div class="bg-white p-6 rounded-2xl border-2 border-blue-50 flex items-center gap-4">
-                <div class="p-3 bg-blue-100 rounded-xl text-blue-600 font-black text-2xl">${projectKeys.length}</div>
-                <div><p class="text-xs text-gray-400 font-bold uppercase">จำนวนโครงการ</p><p class="font-bold text-gray-700 text-lg">รายการโครงการทั้งหมด</p></div>
-            </div>
-            <div class="bg-white p-6 rounded-2xl border-2 border-emerald-50 flex items-center gap-4">
-                <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600 font-black text-lg">฿</div>
-                <div><p class="text-xs text-gray-400 font-bold uppercase">งบประมาณรวม</p><p class="font-bold text-gray-700 text-lg">${totalDistBudget.toLocaleString()} บาท</p></div>
-            </div>
-        </div>
-
-        <h3 class="text-xl font-bold text-gray-800 mb-6">รายการโครงการในพื้นที่</h3>
-        <div class="grid grid-cols-1 gap-6">
-    `;
-
-    projectKeys.forEach((name, index) => {
-        const p = groups[name];
-        modalHtml += `
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-6 items-center">
-                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-xl font-bold flex-shrink-0">${index + 1}</div>
-                <div class="flex-1">
-                    <h4 class="text-lg font-bold text-gray-800 mb-4">${name}</h4>
-                    <div class="flex flex-wrap gap-6 text-sm text-gray-500 mb-6">
-                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span>ผู้ดำเนินงาน: <b>${p.unit}</b></div>
-                        <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-gray-300"></span>งบประมาณ: <b class="text-gray-800">฿${p.budget.toLocaleString()}</b></div>
-                    </div>
-                    <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-                        <div class="h-full transition-all duration-1000" style="width: ${p.progress}%; background-color: ${p.color}"></div>
-                    </div>
-                    <div class="flex justify-between mt-2 text-xs font-bold">
-                        <span class="text-gray-400">สถานะ: ${p.status}</span>
-                        <span style="color: ${p.color}">${p.progress}%</span>
-                    </div>
-                </div>
-            </div>`;
-    });
-
-    modalHtml += `</div>`;
-    openModal(modalHtml); // เรียกใช้งาน Popup
-});
+                            modalHtml += `</div>`;
+                            openModal(modalHtml);
+                        });
                     }
                 }).addTo(map);
 

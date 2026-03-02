@@ -98,7 +98,8 @@
 
             const projectData = Array.isArray(rawData) ? rawData : (rawData.Sheet1 || []);
             
-            document.getElementById('total-projects').innerText = [...new Set(projectData.map(p => p.Project_Name))].length;
+            const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
+            document.getElementById('total-projects').innerText = uniqueProjects.length;
             document.getElementById('total-budget').innerText = "342,906,200";
 
             const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.3);

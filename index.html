@@ -10,15 +10,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f8fafc; }
-        #map { 
-            height: 550px; 
-            width: 100%; 
-            background: #f1f5f9; 
-            border-radius: 12px; 
-            z-index: 10; 
-        }
+        #map { height: 550px; width: 100%; background: #f1f5f9; border-radius: 12px; z-index: 10; }
         .stat-card { transition: all 0.3s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .proj-item { border-left: 4px solid #1a56a0; background: #f0f6ff; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -29,17 +24,17 @@
         </h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-500 border border-gray-100">
+            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-500 border border-gray-100 text-center">
                 <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">จำนวนโครงการ</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-blue-900">14</span>
+                <div class="flex items-baseline justify-center gap-2">
+                    <span id="total-projects" class="text-4xl font-black text-blue-900">14</span>
                     <span class="text-lg text-gray-600 font-semibold">โครงการ</span>
                 </div>
             </div>
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500 border border-gray-100">
+            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500 border border-gray-100 text-center">
                 <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">งบประมาณรวม</p>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-4xl font-black text-emerald-700">342,906,200</span>
+                <div class="flex items-baseline justify-center gap-2">
+                    <span id="total-budget" class="text-4xl font-black text-emerald-700">342,906,200</span>
                     <span class="text-lg text-gray-600 font-semibold">บาท</span>
                 </div>
             </div>
@@ -55,7 +50,7 @@
             </div>
 
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 overflow-y-auto" style="max-height: 610px;">
-                <h3 class="text-lg font-bold mb-4 text-gray-700">รายละเอียดโครงการ</h3>
+                <h3 class="text-lg font-bold mb-4 text-gray-700 border-b pb-2">รายละเอียดโครงการ</h3>
                 <div id="detail-content" class="text-gray-500 text-center py-20 italic">
                     กรุณาคลิกเลือกอำเภอในแผนที่<br>เพื่อดูรายละเอียด
                 </div>
@@ -63,189 +58,80 @@
         </div>
     </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-async function initDashboard() {
-    try {
-        const mapElement = document.getElementById('map');
-        if (!mapElement) {
-            console.error("หาพื้นที่วาดแผนที่ id='map' ไม่เจอ");
-            return;
-        }
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        async function initDashboard() {
+            try {
+                // 1. โหลดข้อมูล (ใส่ v= ป้องกัน Cache)
+                const [dataRes, geoRes] = await Promise.all([
+                    fetch('./data.json?v=' + Date.now()),
+                    fetch('./districts.json?v=' + Date.now())
+                ]);
 
-        // 1. สร้างแผนที่รอก่อน (พิกัดเชียงใหม่)
-        const map = L.map('map').setView([18.7883, 98.9853], 8);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+                if (!dataRes.ok || !geoRes.ok) throw new Error("โหลดไฟล์ JSON ไม่สำเร็จ");
 
-        // บังคับคำนวณขนาดกรอบแผนที่ใหม่ (กันปัญหาแผนที่แหว่ง)
-        setTimeout(() => { map.invalidateSize(); }, 500);
+                const projectData = await dataRes.json();
+                const geoData = await geoRes.json();
 
-        // 2. ดึงข้อมูลพิกัดอำเภอ (districts.json)
-        const geoRes = await fetch('./districts.json');
-        if (!geoRes.ok) throw new Error("โหลดไฟล์ districts.json ไม่สำเร็จ (เช็คชื่อไฟล์บน GitHub)");
-        const geoData = await geoRes.json();
+                // 2. อัปเดตตัวเลขสรุปอัตโนมัติ (ถ้ามีข้อมูล)
+                if (Array.isArray(projectData)) {
+                    document.getElementById('total-projects').innerText = projectData.length;
+                    const total = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
+                    document.getElementById('total-budget').innerText = total.toLocaleString();
+                }
 
-        // 3. ดึงข้อมูลโครงการจาก Sheet (data.json)
-        const dataRes = await fetch('./data.json');
-        let projectData = [];
-        if (dataRes.ok) {
-            projectData = await dataRes.json();
-            // อัปเดตตัวเลขสรุปด้านบนอัตโนมัติ
-            if (document.getElementById('total-projects')) {
-                document.getElementById('total-projects').innerText = projectData.length;
-            }
-        } else {
-            console.warn("โหลด data.json ไม่สำเร็จ แผนที่จะแสดงเฉพาะขอบเขตอำเภอ");
-        }
-
-        // 4. วาดแผนที่อำเภอ
-        L.geoJSON(geoData, {
-            style: function(feature) {
-                // ดึงชื่ออำเภอจาก GeoJSON มาทำความสะอาด (ลบคำว่า อำเภอ ออก)
-                const dNameRaw = feature.properties.amphoe_th || feature.properties.NAME_2 || "";
-                const dNameClean = dNameRaw.replace('อำเภอ', '').trim();
+                // 3. สร้างแผนที่
+                const map = L.map('map').setView([18.7883, 98.9853], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                 
-                // ตรวจสอบว่าใน data.json มีโครงการที่ตรงกับอำเภอนี้ไหม
-                const hasProject = projectData.some(p => 
-                    p.Districts && p.Districts.replace('อำเภอ', '').trim().includes(dNameClean)
-                );
+                setTimeout(() => { map.invalidateSize(); }, 500);
 
-                return {
-                    fillColor: hasProject ? '#10b981' : '#cbd5e1', // เขียวถ้ามีงาน, เทาถ้าไม่มี
-                    weight: 1.5,
-                    opacity: 1,
-                    color: 'white',
-                    fillOpacity: 0.7
-                };
-            },
-            onEachFeature: function(feature, layer) {
-                // 1. ดึงชื่ออำเภอจากแผนที่ (พยายามดึงจากทุกฟิลด์ที่เป็นไปได้)
-                const dName = (feature.properties.amphoe_th || feature.properties.NAME_2 || "ไม่ระบุชื่อ").trim();
+                // 4. วาด GeoJSON และกำหนดฟังก์ชัน
+                L.geoJSON(geoData, {
+                    style: function(feature) {
+                        const dName = feature.properties.amphoe_th || "";
+                        // ค้นหาว่าอำเภอนี้มีโครงการไหม (เพื่อระบายสี)
+                        const hasProj = projectData.some(p => p.Districts && p.Districts.includes(dName.replace('อำเภอ','')));
+                        return {
+                            fillColor: hasProj ? '#10b981' : '#cbd5e1',
+                            weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.7
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const dName = feature.properties.amphoe_th || "ไม่ระบุ";
+                        layer.bindTooltip("อำเภอ" + dName);
 
-                // 2. แสดงชื่อเมื่อเอาเมาส์วาง (Tooltip)
-                layer.bindTooltip("อำเภอ " + dName, { sticky: true });
+                        layer.on('click', function() {
+                            const detailDiv = document.getElementById('detail-content');
+                            const cleanName = dName.replace('อำเภอ', '');
+                            
+                            // กรองโครงการ
+                            const filtered = projectData.filter(p => p.Districts && p.Districts.includes(cleanName));
 
-                // 3. เมื่อคลิกที่อำเภอ
-                layer.on('click', function() {
-                    const detailDiv = document.getElementById('detail-content');
-        
-                    // ทำให้ชื่ออำเภอจากแผนที่สะอาด (ตัดคำว่า 'อำเภอ' ออกเพื่อใช้เทียบ)
-                    const searchName = dName.replace('อำเภอ', '').trim();
-
-                    // 4. กรองโครงการ (ตรวจสอบว่า data.json มีคอลัมน์ชื่อ 'Districts' หรือไม่)
-                    const filtered = projectData.filter(p => {
-                        if (!p.Districts) return false;
-                        // เทียบชื่อโดยการตัดคำว่า 'อำเภอ' ออกทั้งสองฝั่ง เพื่อป้องกัน 'ฝาง' ไม่เจอ 'อำเภอฝาง'
-                        return p.Districts.toString().replace('อำเภอ', '').trim().includes(searchName);
-                    });
-
-                    // 5. สร้าง HTML แสดงผล
-                    let html = `<div style="margin-bottom:15px;">
-                                    <h2 style="font-size: 22px; font-weight: 700; color: #1a56a0;">อำเภอ${dName}</h2>
-                                    <p style="color: #64748b; font-size: 14px;">พบทั้งหมด <b>${filtered.length}</b> รายการ</p>
-                                </div>`;
-
-                    if (filtered.length === 0) {
-                        html += `
-                            <div style="text-align:center; padding: 40px 20px; color: #94a3b8;">
-                                <span style="font-size: 40px; display:block; margin-bottom:10px;">🔍</span>
-                                <p>ไม่พบข้อมูลโครงการในพื้นที่นี้</p>
-                            </div>`;
-                    } else {
-                        filtered.forEach(p => {
-                            // ตรวจสอบชื่อคีย์ให้ตรงกับในไฟล์ JSON ของคุณ (Project_Name, Budget, Status)
-                            const pName = p.Project_Name || p.Project || "ไม่มีชื่อโครงการ";
-                            const pBudget = p.Budget ? Number(p.Budget).toLocaleString() : "0";
-                            const pStatus = p.Status || "ไม่ระบุสถานะ";
-    
-                            html += `
-                                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid #1a56a0; 
-                                        padding: 15px; border-radius: 10px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <div style="font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 8px; line-height: 1.4;">
-                                        ${pName}
-                                    </div>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                                        <span style="font-size: 11px; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px;">
-                                            ${pStatus}
-                                        </span>
-                                        <span style="font-weight: 700; color: #10a97a; font-size: 14px;">
-                                            ${pBudget} <small style="font-weight: 400; font-size: 10px;">บาท</small>
-                                        </span>
-                                    </div>
-                                </div>`;
+                            let html = `<h4 class="text-xl font-bold text-blue-900 mb-4">อำเภอ${dName}</h4>`;
+                            if (filtered.length === 0) {
+                                html += `<p class="text-gray-400 italic">ไม่มีโครงการในพื้นที่นี้</p>`;
+                            } else {
+                                filtered.forEach(p => {
+                                    html += `
+                                        <div class="proj-item">
+                                            <div class="font-bold text-sm text-gray-800">${p.Project_Name}</div>
+                                            <div class="text-xs text-blue-600 mt-1">งบประมาณ: ${Number(p.Budget || 0).toLocaleString()} บาท</div>
+                                            <div class="text-[10px] text-gray-500 mt-1">สถานะ: ${p.Status}</div>
+                                        </div>`;
+                                });
+                            }
+                            detailDiv.innerHTML = html;
                         });
                     }
-        detailDiv.innerHTML = html;
-        
-        // เลื่อนหน้าจอไปด้านบนของส่วนรายละเอียด (สำหรับมือถือ)
-        detailDiv.scrollTop = 0;
-    });
-}
-        }).addTo(map);onEachFeature: function(feature, layer) {
-                const dNameRaw = feature.properties.amphoe_th || feature.properties.NAME_2 || "ไม่ระบุชื่อ";
-                const dNameClean = dNameRaw.replace('อำเภอ', '').trim();
-                
-                // แสดงชื่ออำเภอเมื่อเอาเมาส์วาง
-                layer.bindTooltip("อำเภอ" + dNameClean);
+                }).addTo(map);
 
-                layer.on('click', function() {
-                    const detailDiv = document.getElementById('detail-content');
-                    
-                    // กรองโครงการ: ตัดคำว่า 'อำเภอ' ออกทั้งสองฝั่งก่อนเทียบ เพื่อความแม่นยำ
-                    const filtered = projectData.filter(p => 
-                        p.Districts && p.Districts.replace('อำเภอ', '').trim().includes(dNameClean)
-                    );
-
-                    // สร้าง HTML สำหรับแสดงผลด้านข้าง
-                    let html = `<div class="mb-6">
-                                    <h2 class="text-2xl font-bold text-blue-900">อำเภอ${dNameClean}</h2>
-                                    <p class="text-sm text-gray-500 font-medium">พบทั้งหมด ${filtered.length} รายการ</p>
-                                </div>`;
-
-                    if (filtered.length === 0) {
-                        html += `<div class="py-20 text-center text-gray-400 italic">ไม่มีข้อมูลโครงการในพื้นที่นี้</div>`;
-                    } else {
-                        filtered.forEach(p => {
-                            // เช็คสถานะเพื่อเปลี่ยนสีแถบข้างโครงการ
-                            const isDone = p.Status.includes('สำเร็จ') || p.Status.includes('GFMIS');
-                            const stripeColor = isDone ? 'border-emerald-500' : 'border-blue-500';
-                            const bgColor = isDone ? 'bg-emerald-50' : 'bg-blue-50';
-
-                            html += `
-                                <div class="mb-4 p-4 rounded-xl border-l-4 ${stripeColor} ${bgColor} shadow-sm">
-                                    <div class="font-bold text-gray-800 text-sm mb-2 leading-tight">${p.Project_Name}</div>
-                                    <div class="grid grid-cols-2 gap-2 mt-3 text-[11px]">
-                                        <div>
-                                            <span class="text-gray-500 block">สถานะ:</span>
-                                            <span class="font-semibold text-gray-700">${p.Status}</span>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-gray-500 block">งบประมาณ:</span>
-                                            <span class="font-bold text-emerald-700 text-sm">${Number(p.Budget || 0).toLocaleString()} ฿</span>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 text-[10px] text-gray-400">หน่วยงาน: ${p.Responsible_Unit || '-'}</div>
-                                </div>`;
-                        });
-                    }
-                    detailDiv.innerHTML = html;
-                });
+            } catch (err) {
+                console.error("ผิดพลาด:", err);
+                document.getElementById('map').innerHTML = `<div class="p-10 text-red-500 text-center">แผนที่หาย! สาเหตุ: ${err.message}</div>`;
             }
-        }).addTo(map);
-        console.log("แผนที่และข้อมูลโครงการเชื่อมต่อสำเร็จ!");
-
-    } catch (err) {
-        console.error("เกิดข้อผิดพลาด:", err);
-        // แสดงข้อความแจ้งเตือนบนหน้าเว็บเพื่อให้คุณเห็นว่าติดตรงไหน
-        const mapErr = document.getElementById('map');
-        if (mapErr) mapErr.innerHTML = `<div class="p-10 text-red-500 text-center font-bold">ไม่สามารถโหลดแผนที่ได้: ${err.message}</div>`;
-    }
-}
-
-// เรียกใช้งานเมื่อหน้าจอโหลดเสร็จ
-window.addEventListener('load', initDashboard);
-</script>
+        }
+        window.onload = initDashboard;
+    </script>
 </body>
 </html>

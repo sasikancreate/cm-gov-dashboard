@@ -10,10 +10,10 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f8fafc; }
-        #map { height: 550px; width: 100%; background: #f1f5f9; border-radius: 12px; z-index: 10; }
+        #map { height: 550px; width: 100%; background: #f1f5f9; border-radius: 12px; z-index: 10; border: 1px solid #e2e8f0; }
         .stat-card { transition: all 0.3s; }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .proj-item { border-left: 4px solid #1a56a0; background: #f0f6ff; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        .proj-item { border-left: 4px solid #1e40af; background: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 12px; shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -24,14 +24,14 @@
         </h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-500 border border-gray-100 text-center">
-                <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">จำนวนโครงการ</p>
+            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-500 text-center">
+                <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">จำนวนโครงการหลัก</p>
                 <div class="flex items-baseline justify-center gap-2">
-                    <span id="total-projects" class="text-4xl font-black text-blue-900">14</span>
+                    <span id="total-projects" class="text-4xl font-black text-blue-900">0</span>
                     <span class="text-lg text-gray-600 font-semibold">โครงการ</span>
                 </div>
             </div>
-            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500 border border-gray-100 text-center">
+            <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500 text-center">
                 <p class="text-gray-500 text-sm font-medium uppercase tracking-wider">งบประมาณรวม</p>
                 <div class="flex items-baseline justify-center gap-2">
                     <span id="total-budget" class="text-4xl font-black text-emerald-700">342,906,200</span>
@@ -58,98 +58,95 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-async function initDashboard() {
-    try {
-        const [dataRes, geoRes] = await Promise.all([
-            fetch('./data.json?v=' + Date.now()),
-            fetch('./districts.json?v=' + Date.now())
-        ]);
+        async function initDashboard() {
+            try {
+                const [dataRes, geoRes] = await Promise.all([
+                    fetch('./data.json?v=' + Date.now()),
+                    fetch('./districts.json?v=' + Date.now())
+                ]);
 
-        const projectData = await dataRes.json();
-        const geoData = await geoRes.json();
+                if (!dataRes.ok || !geoRes.ok) throw new Error("โหลดไฟล์ JSON ไม่สำเร็จ");
 
-        // 1. แก้ไขจำนวนโครงการ: นับเฉพาะชื่อโครงการที่ไม่ซ้ำกัน (ให้ได้ 14)
-        if (Array.isArray(projectData)) {
-            const uniqueProjectNames = [...new Set(projectData.map(p => p.Project_Name))];
-            document.getElementById('total-projects').innerText = uniqueProjectNames.length;
-            
-            // คำนวณงบประมาณรวม (ใช้ข้อมูลจากไฟล์โดยตรง)
-            const totalBudget = 342906200; // หรือใช้ logic รวมค่าจากไฟล์ถ้าข้อมูลไม่อัปเดต
-            document.getElementById('total-budget').innerText = totalBudget.toLocaleString();
-        }
+                const projectData = await dataRes.json();
+                const geoData = await geoRes.json();
 
-        const map = L.map('map').setView([18.7883, 98.9853], 8);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        setTimeout(() => { map.invalidateSize(); }, 500);
-
-        // 2. วาดแผนที่และเชื่อมข้อมูล
-        L.geoJSON(geoData, {
-            style: function(feature) {
-                // ใช้ amp_th ตามที่คุณแจ้งมา
-                const dName = feature.properties.amp_th || ""; 
-                // เช็คโครงการโดยตัดคำว่า "อำเภอ" ออกจากข้อมูลใน Sheet ก่อนเทียบ
-                const hasProj = projectData.some(p => p.Districts && p.Districts.replace('อำเภอ', '').trim() === dName.trim());
-                
-                return {
-                    fillColor: hasProj ? '#10b981' : '#cbd5e1',
-                    weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.7
-                };
-            },
-            onEachFeature: function(feature, layer) {
-                // ใช้ amp_th สำหรับ Tooltip และการคลิก
-                const dName = feature.properties.amp_th || "ไม่ระบุชื่อ";
-                layer.bindTooltip("อำเภอ" + dName);
-
-                layer.on('click', function() {
-                    const detailDiv = document.getElementById('detail-content');
+                // 1. สรุปจำนวนโครงการหลัก (Unique Project Name)
+                if (Array.isArray(projectData)) {
+                    const uniqueNames = [...new Set(projectData.map(p => p.Project_Name))];
+                    document.getElementById('total-projects').innerText = uniqueNames.length;
                     
-                    // กรองข้อมูล: เทียบชื่ออำเภอจากแผนที่ กับชื่อใน data.json (ที่ตัดคำว่า 'อำเภอ' ออกแล้ว)
-                    const filtered = projectData.filter(p => 
-                        p.Districts && p.Districts.replace('อำเภอ', '').trim() === dName.trim()
-                    );
+                    const totalB = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
+                    // หมายเหตุ: ถ้างบประมาณในไฟล์ซ้ำกันตามกิจกรรมย่อย ตัวเลขอาจจะสูงกว่าความเป็นจริง
+                    // หากต้องการใช้ค่าคงที่ ให้แก้บรรทัดล่างเป็น .innerText = "342,906,200";
+                    document.getElementById('total-budget').innerText = totalB.toLocaleString();
+                }
 
-                    // ยุบรวมกิจกรรมย่อยให้แสดงเป็นกลุ่มโครงการหลัก
-                    const groupedProjects = {};
-                    filtered.forEach(p => {
-                        if (!groupedProjects[p.Project_Name]) {
-                            groupedProjects[p.Project_Name] = {
-                                budget: p.Budget,
-                                status: p.Status,
-                                unit: p.Responsible_Unit,
-                                subActivities: []
-                            };
-                        }
-                        groupedProjects[p.Project_Name].subActivities.push(p.Sub_Activity_Name);
-                    });
+                // 2. สร้างแผนที่
+                const map = L.map('map').setView([18.7883, 98.9853], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                setTimeout(() => { map.invalidateSize(); }, 500);
 
-                    let html = `<h4 class="text-2xl font-bold text-blue-900 mb-4 border-b-2 border-blue-100 pb-2">อำเภอ${dName}</h4>`;
-                    
-                    const projectKeys = Object.keys(groupedProjects);
-                    if (projectKeys.length === 0) {
-                        html += `<div class="py-20 text-center text-gray-400 italic">ไม่มีข้อมูลโครงการในพื้นที่นี้</div>`;
-                    } else {
-                        projectKeys.forEach(name => {
-                            const p = groupedProjects[name];
-                            html += `
-                                <div class="mb-5 p-4 rounded-xl border-l-4 border-blue-600 bg-white shadow-sm ring-1 ring-black ring-opacity-5">
-                                    <div class="font-bold text-gray-900 text-sm mb-2 leading-tight">${name}</div>
-                                    <div class="text-xs text-emerald-600 font-bold mb-2">งบประมาณ: ${Number(p.budget || 0).toLocaleString()} บาท</div>
-                                    <div class="text-[10px] text-gray-500 mb-2"><b>สถานะ:</b> ${p.status}</div>
-                                    <div class="text-[10px] text-gray-400 border-t pt-2 italic">หน่วยงาน: ${p.unit}</div>
-                                </div>`;
+                // 3. วาดแผนที่จาก districts.json
+                L.geoJSON(geoData, {
+                    style: function(feature) {
+                        const dName = (feature.properties.amp_th || "").trim();
+                        const hasProj = projectData.some(p => p.Districts && p.Districts.includes(dName));
+                        return {
+                            fillColor: hasProj ? '#10b981' : '#cbd5e1',
+                            weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.7
+                        };
+                    },
+                    onEachFeature: function(feature, layer) {
+                        const dName = feature.properties.amp_th || "ไม่ระบุชื่อ";
+                        layer.bindTooltip("อำเภอ" + dName);
+
+                        layer.on('click', function() {
+                            const detailDiv = document.getElementById('detail-content');
+                            // กรองโครงการโดยเทียบชื่ออำเภอ (ตัดคำว่า 'อำเภอ' ออกจากข้อมูลใน Sheet ถ้ามี)
+                            const filtered = projectData.filter(p => 
+                                p.Districts && p.Districts.replace('อำเภอ', '').trim().includes(dName.trim())
+                            );
+
+                            // ยุบรวมกิจกรรมย่อยให้โชว์ตามโครงการหลัก
+                            const groups = {};
+                            filtered.forEach(p => {
+                                if (!groups[p.Project_Name]) {
+                                    groups[p.Project_Name] = { budget: p.Budget, status: p.Status, unit: p.Responsible_Unit };
+                                }
+                            });
+
+                            let html = `<h4 class="text-xl font-bold text-blue-900 mb-4 border-b-2 border-blue-100 pb-2">อำเภอ${dName}</h4>`;
+                            const keys = Object.keys(groups);
+                            
+                            if (keys.length === 0) {
+                                html += `<div class="py-10 text-center text-gray-400">ไม่พบโครงการในพื้นที่นี้</div>`;
+                            } else {
+                                keys.forEach(name => {
+                                    const p = groups[name];
+                                    html += `
+                                        <div class="proj-item shadow-sm">
+                                            <div class="font-bold text-sm text-gray-800 leading-tight mb-2">${name}</div>
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">${p.status}</span>
+                                                <span class="text-sm font-bold text-emerald-600">${Number(p.budget || 0).toLocaleString()} ฿</span>
+                                            </div>
+                                            <div class="text-[10px] text-gray-400 mt-2 italic">หน่วยงาน: ${p.unit}</div>
+                                        </div>`;
+                                });
+                            }
+                            detailDiv.innerHTML = html;
                         });
                     }
-                    detailDiv.innerHTML = html;
-                });
-            }
-        }).addTo(map);
+                }).addTo(map);
 
-    } catch (err) {
-        console.error("Error:", err);
-    }
-}
-window.onload = initDashboard;
-</script>
+            } catch (err) {
+                console.error(err);
+                document.getElementById('map').innerHTML = `<div class="p-10 text-red-500 text-center font-bold">เกิดข้อผิดพลาด: ${err.message}</div>`;
+            }
+        }
+        window.onload = initDashboard;
+    </script>
 </body>
 </html>

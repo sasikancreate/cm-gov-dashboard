@@ -134,6 +134,7 @@
                         color: 'white',      // เส้นขอบสีขาวตัดกับ Heat Map
                         fillOpacity: 0.9     // สีทึบชัดเจนขึ้น
                     };
+                },
                 onEachFeature: function(feature, layer) {
                     const dName = (feature.properties.amp_th || "ไม่ระบุ").trim();
                     layer.bindTooltip("อำเภอ" + dName);

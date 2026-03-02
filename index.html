@@ -84,9 +84,13 @@
     async function initDashboard() {
         try {
             const [dataRes, geoRes] = await Promise.all([
-                fetch('/data.json?v=' + Date.now()),
-                fetch('/districts.json?v=' + Date.now())
+                fetch('https://sasikancreate.github.io/cm-gov-dashboard/data.json?v=' + Date.now()),
+                fetch('https://sasikancreate.github.io/cm-gov-dashboard/districts.json?v=' + Date.now())
             ]);
+            
+            if (!dataRes.ok || !geoRes.ok) {
+            throw new Error(`โหลดไฟล์ไม่สำเร็จ: Data(${dataRes.status}) Districts(${geoRes.status})`);
+            }
             const projectData = await dataRes.json();
             const geoData = await geoRes.json();
 

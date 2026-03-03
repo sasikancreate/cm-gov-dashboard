@@ -34,11 +34,11 @@
     </div>
 
     <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl md:text-4xl font-black text-center text-slate-900 mb-10 tracking-tight italic">Chiang Mai Dashboard 2568</h1>
+        <h1 class="text-2xl md:text-4xl font-black text-center text-slate-900 mb-10 tracking-tight">Dashboard ติดตามโครงการจังหวัดเชียงใหม่ 2568</h1>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
             <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">จำนวนโครงการหลัก</p>
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">จำนวนโครงการหลัก (Project Master)</p>
                 <div class="flex items-baseline justify-center gap-2">
                     <span id="total-projects" class="text-5xl font-black text-blue-600">0</span>
                     <span class="text-xl text-slate-400 font-bold">โครงการ</span>
@@ -46,7 +46,7 @@
             </div>
             <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
                 <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">งบประมาณรวมทั้งสิ้น</p>
-                <div class="flex items-baseline justify-center gap-2 text-left">
+                <div class="flex items-baseline justify-center gap-2">
                     <span id="total-budget" class="text-5xl font-black text-emerald-600">0</span>
                     <span class="text-xl text-slate-400 font-bold">บาท</span>
                 </div>
@@ -56,7 +56,7 @@
         <div class="w-full bg-white p-6 rounded-[40px] shadow-sm border border-slate-100">
             <h3 class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-3">
                 <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-                แผนที่แสดงผลรายอำเภอ (คลิกเลือกพื้นที่)
+                แผนที่แสดงผลรายอำเภอ (คลิกเพื่อดูรายละเอียดโครงการ)
             </h3>
             <div id="map"></div>
         </div>
@@ -70,12 +70,11 @@
 
     function getProgressValue(s) {
         if (!s) return 0;
-        const status = s.trim();
-        if (status.includes("GFMIS")) return 100;
-        if (status.includes("ลงนาม")) return 90;
-        if (status.includes("ประกาศผล")) return 80;
-        if (status.includes("ดำเนินการ")) return 50;
-        if (status.includes("ร่างขอบเขต")) return 20;
+        if (s.includes("GFMIS")) return 100;
+        if (s.includes("ลงนาม")) return 90;
+        if (s.includes("ประกาศผลผู้ชนะ")) return 80;
+        if (s.includes("ดำเนินการ")) return 50;
+        if (s.includes("ร่างขอบเขต")) return 20;
         return 10;
     }
 
@@ -100,19 +99,22 @@
             const rawData = await dataRes.json();
             const geoData = await geoRes.json();
 
-            // ตรวจสอบโครงสร้างข้อมูล (14 โครงการ)
+            // ข้อมูลโครงการจาก data.json
             const projectData = Array.isArray(rawData) ? rawData : (rawData.Sheet1 || []);
-            
-            // สรุปยอด
-            document.getElementById('total-projects').innerText = projectData.length;
-            const totalBudget = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
-            document.getElementById('total-budget').innerText = totalBudget.toLocaleString();
+
+            // นับจำนวนโครงการที่ไม่ซ้ำจาก Project_ID ให้ได้ 14 โครงการ
+            const uniqueProjectIDs = [...new Set(projectData.map(p => p.Project_ID))];
+            document.getElementById('total-projects').innerText = uniqueProjectIDs.length;
+
+            // รวมงบประมาณ (กรองเอาเฉพาะค่าที่มีตัวเลข)
+            const totalBudgetSum = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
+            document.getElementById('total-budget').innerText = totalBudgetSum.toLocaleString();
 
             const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.3);
             
             L.geoJSON(geoData, {
                 style: function(feature) {
-                    // ใช้ amp_th ให้ตรงกับ districts.json ของคุณ
+                    // *** แก้ตรงนี้: ใช้ amp_th ให้ตรงกับ districts.json ***
                     const dName = (feature.properties.amp_th || "").trim();
                     const filtered = projectData.filter(p => 
                         p.Districts && p.Districts.replace('อำเภอ','').trim() === dName.replace('อำเภอ','').trim());
@@ -126,7 +128,7 @@
                 },
                 onEachFeature: function(feature, layer) {
                     const dName = (feature.properties.amp_th || "ไม่ระบุ").trim();
-                    layer.bindTooltip("อำเภอ" + dName);
+                    layer.bindTooltip("อำเภอ " + dName);
 
                     layer.on('click', function() {
                         const cleanName = dName.replace('อำเภอ','').trim();
@@ -138,12 +140,12 @@
 
                         let html = `
                             <div class="bg-slate-900 p-10 rounded-[40px] text-white flex flex-col md:flex-row justify-between items-center mb-8 gap-4 text-left">
-                                <div><h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2><p class="opacity-60 text-sm">ข้อมูลโครงการรวม 2568</p></div>
-                                <div class="flex items-center gap-3"><span class="text-6xl font-black text-emerald-400">${avgDist}%</span><span class="text-xs font-bold opacity-60 leading-tight text-left">ความคืบหน้า<br>ภาพรวม</span></div>
+                                <div><h2 class="text-4xl font-black mb-1 italic">อำเภอ${dName}</h2><p class="opacity-60 text-sm">ข้อมูลโครงการตามแผนปี 2568</p></div>
+                                <div class="flex items-center gap-3 bg-white/10 p-4 rounded-3xl"><span class="text-6xl font-black text-emerald-400">${avgDist}%</span><span class="text-xs font-bold opacity-60 leading-tight text-left">ความคืบหน้า<br>ภาพรวม</span></div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 text-left">
-                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6"><div class="p-4 bg-blue-50 rounded-2xl text-blue-600 font-black text-3xl">${filtered.length}</div><div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest text-left">โครงการ</p><p class="font-bold text-slate-800 text-xl text-left">รายการทั้งหมด</p></div></div>
-                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6 text-left"><div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 font-black text-2xl">฿</div><div class="text-left"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest text-left">งบประมาณรวม</p><p class="font-bold text-slate-800 text-xl text-left">${distBudget.toLocaleString()} บาท</p></div></div>
+                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6"><div class="p-4 bg-blue-50 rounded-2xl text-blue-600 font-black text-3xl">${filtered.length}</div><div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest text-left">รายการย่อย</p><p class="font-bold text-slate-800 text-xl text-left">ในพื้นที่นี้</p></div></div>
+                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6 text-left"><div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 font-black text-2xl">฿</div><div class="text-left"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest text-left">งบประมาณพื้นที่</p><p class="font-bold text-slate-800 text-xl text-left">${distBudget.toLocaleString()} บาท</p></div></div>
                             </div>
                             <div class="space-y-4">`;
 
@@ -153,16 +155,16 @@
                                 <div class="bg-white p-8 rounded-[32px] border border-slate-50 shadow-sm text-left">
                                     <h4 class="text-lg font-bold text-slate-800 mb-2 text-left">${p.Project_Name}</h4>
                                     <p class="text-sm text-slate-500 mb-4 text-left">${p.Sub_Activity || p.Main_Activity || ""}</p>
-                                    <div class="flex flex-wrap gap-4 text-xs font-bold text-slate-500 mb-6 text-left">
-                                        <div>หน่วยงาน: <span class="text-slate-800">${p.Responsible_Unit}</span></div>
-                                        <div>งบประมาณ: <span class="text-slate-900">฿${(Number(p.Budget) || 0).toLocaleString()}</span></div>
+                                    <div class="flex flex-wrap gap-6 text-xs font-bold text-slate-500 mb-6 uppercase tracking-wider text-left">
+                                        <div class="text-left">หน่วยงาน: <span class="text-slate-800">${p.Responsible_Unit}</span></div>
+                                        <div class="text-left">งบประมาณ: <span class="text-slate-900">฿${(Number(p.Budget) || 0).toLocaleString()}</span></div>
                                     </div>
                                     <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2 text-left"><div class="h-full" style="width:${prog}%; background-color:${getColor(prog)}"></div></div>
-                                    <div class="flex justify-between text-[10px] font-black uppercase"><span class="text-slate-400">${p.Status}</span><span>${prog}%</span></div>
+                                    <div class="flex justify-between text-[10px] font-black uppercase"><span class="text-slate-400 text-left">${p.Status}</span><span>${prog}%</span></div>
                                 </div>`;
                         });
                         
-                        if(filtered.length === 0) html += `<div class="p-20 text-center text-slate-400 font-bold">ไม่มีข้อมูลโครงการในเขตพื้นที่นี้</div>`;
+                        if(filtered.length === 0) html += `<div class="p-20 text-center text-slate-400 font-bold">ไม่มีโครงการในพื้นที่นี้</div>`;
                         html += `</div>`;
                         openModal(html);
                     });
@@ -173,7 +175,7 @@
             legend.onAdd = function () {
                 const div = L.DomUtil.create('div', 'info legend');
                 const grades = [0, 20, 50, 80, 100];
-                const labels = ['รอดำเนินการ', 'ร่าง TOR', 'กำลังดำเนินการ', 'ประกาศผู้ชนะ', 'เบิกจ่ายสำเร็จ'];
+                const labels = ['รอดำเนินการ', 'ร่าง TOR', 'กำลังดำเนินการ', 'ประกาศผลผู้ชนะ', 'เบิกจ่าย GFMIS'];
                 div.innerHTML = '<div class="legend-title">เกณฑ์สถานะโครงการ</div>';
                 for (let i = 0; i < grades.length; i++) {
                     div.innerHTML += '<i style="background:' + getColor(grades[i]) + '"></i> ' + labels[i] + '<br>';

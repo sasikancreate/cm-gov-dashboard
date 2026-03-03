@@ -10,90 +10,72 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f1f5f9; }
-        #map { height: 650px; width: 100%; background: #ffffff; border-radius: 40px; z-index: 10; border: 1px solid #e2e8f0; }
-        .stat-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .stat-card:hover { transform: translateY(-10px); box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.1); }
-        .info.legend { padding: 20px; font-size: 13px; background: white; border-radius: 24px; line-height: 24px; color: #475569; border: 1px solid #f1f5f9; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .info.legend i { width: 14px; height: 14px; float: left; margin-right: 12px; margin-top: 5px; border-radius: 4px; }
-        .legend-title { font-weight: 800; margin-bottom: 10px; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
-        /* สไตล์ Scrollbar ใน Modal */
-        #modal-body::-webkit-scrollbar { width: 8px; }
-        #modal-body::-webkit-scrollbar-track { background: transparent; }
-        #modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        body { font-family: 'IBM Plex Sans Thai', sans-serif; background: #f8fafc; }
+        #map { height: 600px; width: 100%; background: white; border-radius: 24px; z-index: 10; border: 1px solid #e2e8f0; }
+        .stat-card { transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .info.legend { padding: 15px; font-size: 12px; background: white; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 15px; line-height: 20px; color: #334155; border: 1px solid #e2e8f0; }
+        .info.legend i { width: 18px; height: 18px; float: left; margin-right: 10px; opacity: 0.9; border-radius: 4px; }
+        .legend-title { font-weight: 700; margin-bottom: 8px; color: #1e293b; }
     </style>
 </head>
-<body class="p-4 md:p-12">
+<body class="p-4 md:p-8">
 
-    <div id="project-modal" class="fixed inset-0 z-[9999] hidden bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-white w-full max-w-5xl max-h-[90vh] rounded-[50px] overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in duration-300">
-            <button onclick="closeModal()" class="absolute top-8 right-8 z-50 p-3 bg-slate-100 hover:bg-slate-200 rounded-full transition-all">
-                <svg class="w-6 h-6 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <div id="project-modal" class="fixed inset-0 z-[9999] hidden bg-black bg-opacity-60 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-5xl max-h-[90vh] rounded-[40px] overflow-hidden shadow-2xl flex flex-col relative animate-in fade-in zoom-in duration-300">
+            <button onclick="closeModal()" class="absolute top-6 right-6 z-50 p-2 bg-white/80 hover:bg-gray-200 rounded-full shadow-md">
+                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
-            <div id="modal-body" class="overflow-y-auto p-8 md:p-16 bg-white"></div>
-            <div class="p-6 bg-slate-50 border-t flex justify-center">
-                <button onclick="closeModal()" class="px-16 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 shadow-lg">ปิดหน้าต่าง</button>
+            <div id="modal-body" class="overflow-y-auto p-6 md:p-12 bg-slate-50"></div>
+            <div class="p-4 bg-white border-t flex justify-center">
+                <button onclick="closeModal()" class="px-12 py-3 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-700 shadow-lg transition-all">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-12 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-                <h1 class="text-3xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">Chiang Mai Provincial Dashboard</h1>
-                <p class="text-slate-500 font-bold uppercase tracking-widest text-sm">กลุ่มงานยุทธศาสตร์และข้อมูลเพื่อการพัฒนาจังหวัด ปีงบประมาณ 2568</p>
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            <div class="stat-card bg-white p-10 rounded-[48px] shadow-sm border border-white text-center">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em] mb-4">จำนวนโครงการทั้งหมด</p>
-                <div class="flex items-baseline justify-center gap-3">
-                    <span id="total-projects" class="text-6xl font-black text-indigo-600">0</span>
+        <h1 class="text-2xl md:text-4xl font-black text-center text-slate-900 mb-10 tracking-tight">Dashboard ติดตามผลการดำเนินงาน ปีงบประมาณ 2568</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">จำนวนโครงการหลัก</p>
+                <div class="flex items-baseline justify-center gap-2">
+                    <span id="total-projects" class="text-5xl font-black text-blue-600">0</span>
                     <span class="text-xl text-slate-400 font-bold">โครงการ</span>
                 </div>
             </div>
-            <div class="stat-card bg-white p-10 rounded-[48px] shadow-sm border border-white text-center text-left">
-                <p class="text-slate-400 text-xs font-black uppercase tracking-[0.2em] mb-4">งบประมาณรวมทั้งสิ้น</p>
-                <div class="flex items-baseline justify-center gap-3">
-                    <span id="total-budget" class="text-6xl font-black text-emerald-600">0</span>
+            <div class="stat-card bg-white p-8 rounded-[32px] shadow-sm border border-slate-100 text-center">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">งบประมาณรวมทั้งสิ้น</p>
+                <div class="flex items-baseline justify-center gap-2">
+                    <span id="total-budget" class="text-5xl font-black text-emerald-600">0</span>
                     <span class="text-xl text-slate-400 font-bold">บาท</span>
                 </div>
             </div>
         </div>
 
-        <div class="w-full bg-white p-10 rounded-[56px] shadow-sm border border-white">
-            <div class="flex items-center justify-between mb-8">
-                <h3 class="text-2xl font-extrabold text-slate-800 flex items-center gap-4">
-                    <span class="w-3 h-10 bg-indigo-600 rounded-full"></span>
-                    แผนที่ติดตามความคืบหน้า (Heat Map)
-                </h3>
-                <span class="px-4 py-2 bg-slate-100 rounded-full text-xs font-bold text-slate-500 uppercase tracking-widest">คลิกที่อำเภอเพื่อดูรายละเอียด</span>
-            </div>
+        <div class="w-full bg-white p-6 rounded-[40px] shadow-sm border border-slate-100">
+            <h3 class="text-xl font-bold mb-6 text-slate-800 flex items-center gap-3">
+                <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                แผนที่แสดงผลรายอำเภอ (คลิกเลือกพื้นที่)
+            </h3>
             <div id="map"></div>
         </div>
     </div>
 
     <script>
-    // 1. ฟังก์ชันกำหนดสีตามระดับ % (0-100)
     function getColor(d) {
         return d >= 100 ? '#10b981' : d >= 80 ? '#34d399' : d >= 60 ? '#fbbf24' :
-               d >= 40  ? '#fb923c' : d >= 20 ? '#f87171' : d >= 1   ? '#ef4444' : '#94a3b8'; 
+               d >= 40  ? '#fb923c' : d >= 20 ? '#f87171' : d >= 1 ? '#ef4444' : '#94a3b8';
     }
 
-    // 2. ฟังก์ชันแปลง "สถานะ" เป็นตัวเลข % เพื่อวาด Heat Map
-    function getProgressValue(status) {
-        if (!status) return 0;
-        const s = status.trim();
-        if (s.includes("GFMIS") || s.includes("สำเร็จ")) return 100;
+    function getProgressValue(s) {
+        if (!s) return 0;
+        if (s.includes("GFMIS")) return 100;
         if (s.includes("ลงนาม")) return 90;
-        if (s.includes("ประกาศผลผู้ชนะ")) return 80;
-        if (s.includes("เชิญชวน")) return 60;
+        if (s.includes("ประกาศผล")) return 80;
         if (s.includes("ดำเนินการ")) return 50;
-        if (s.includes("ขอซื้อ")) return 30;
         if (s.includes("ร่างขอบเขต")) return 20;
-        if (s.includes("อนุมัติ")) return 10;
-        return 5;
+        return 10;
     }
 
     function openModal(htmlContent) {
@@ -113,22 +95,27 @@
                 fetch('./data.json?v=' + Date.now()),
                 fetch('./districts.json?v=' + Date.now())
             ]);
+            
             const rawData = await dataRes.json();
             const geoData = await geoRes.json();
 
-            // รองรับทั้งแบบหุ้ม Sheet1 และแบบ Array ตรงๆ
+            // รองรับข้อมูลที่เป็น Array ของ 14 โครงการโดยตรง
             const projectData = Array.isArray(rawData) ? rawData : (rawData.Sheet1 || []);
 
-            // สรุปตัวเลขหน้าแรก
-            document.getElementById('total-projects').innerText = projectData.length;
-            const totalBudget = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
-            document.getElementById('total-budget').innerText = totalBudget.toLocaleString();
+            // นับจำนวนโครงการที่ไม่ซ้ำ (Project_Name หรือ Project_ID)
+            const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
+            document.getElementById('total-projects').innerText = uniqueProjects.length;
 
-            const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.4);
+            // รวมงบประมาณ
+            const totalBudgetSum = projectData.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
+            document.getElementById('total-budget').innerText = totalBudgetSum.toLocaleString();
 
+            const map = L.map('map', { zoomSnap: 0.1, attributionControl: false }).setView([18.82, 99.05], 8.3);
+            
             L.geoJSON(geoData, {
                 style: function(feature) {
-                    const dName = (feature.properties.amphoe_t || "").trim(); // ใช้ amphoe_t ให้ตรงไฟล์ districts.json
+                    // ใช้ amphoe_t ให้ตรงกับไฟล์ districts.json
+                    const dName = (feature.properties.amphoe_t || "").trim();
                     const filtered = projectData.filter(p => 
                         p.Districts && p.Districts.replace('อำเภอ','').trim() === dName.replace('อำเภอ','').trim());
                     
@@ -137,11 +124,11 @@
                         const total = filtered.reduce((sum, p) => sum + getProgressValue(p.Status), 0);
                         avg = total / filtered.length;
                     }
-                    return { fillColor: getColor(avg), weight: 1.5, opacity: 1, color: '#f1f5f9', fillOpacity: 0.85 };
+                    return { fillColor: getColor(avg), weight: 1.5, opacity: 1, color: 'white', fillOpacity: 0.85 };
                 },
                 onEachFeature: function(feature, layer) {
                     const dName = (feature.properties.amphoe_t || "ไม่ระบุ").trim();
-                    layer.bindTooltip("อำเภอ " + dName, { sticky: true });
+                    layer.bindTooltip("อำเภอ" + dName);
 
                     layer.on('click', function() {
                         const cleanName = dName.replace('อำเภอ','').trim();
@@ -149,58 +136,56 @@
                             p.Districts && p.Districts.replace('อำเภอ','').trim() === cleanName);
 
                         const distBudget = filtered.reduce((sum, p) => sum + (Number(p.Budget) || 0), 0);
-                        const distAvg = filtered.length > 0 ? Math.round(filtered.reduce((sum, p) => sum + getProgressValue(p.Status), 0) / filtered.length) : 0;
+                        const avgDist = filtered.length > 0 ? Math.round(filtered.reduce((sum, p) => sum + getProgressValue(p.Status), 0) / filtered.length) : 0;
 
                         let html = `
-                            <div class="bg-indigo-600 p-12 rounded-[40px] text-white shadow-xl flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-                                <div class="text-left w-full"><h2 class="text-5xl font-black mb-1 italic">อำเภอ${dName}</h2><p class="opacity-80 font-medium">สรุปข้อมูลโครงการประจำปีงบประมาณ 2568</p></div>
-                                <div class="bg-white/20 p-6 rounded-3xl backdrop-blur-md flex items-baseline gap-2">
-                                    <span class="text-6xl font-black text-white">${distAvg}%</span>
-                                    <span class="text-xs font-bold uppercase tracking-tighter opacity-80 leading-none">ความคืบหน้า<br>ภาพรวม</span>
-                                </div>
+                            <div class="bg-slate-900 p-10 rounded-[40px] text-white flex flex-col md:flex-row justify-between items-center mb-8 gap-4 text-left">
+                                <div><h2 class="text-4xl font-black mb-1">อำเภอ${dName}</h2><p class="opacity-60 text-sm">ข้อมูลโครงการประจำปี 2568</p></div>
+                                <div class="flex items-center gap-3"><span class="text-6xl font-black text-emerald-400">${avgDist}%</span><span class="text-xs font-bold opacity-60 leading-tight">ความคืบหน้า<br>ภาพรวม</span></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                                <div class="bg-slate-50 p-8 rounded-[36px] flex items-center gap-6"><div class="p-5 bg-indigo-100 rounded-3xl text-indigo-600 font-black text-3xl">${filtered.length}</div><div><p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1 text-left">โครงการ</p><p class="font-bold text-slate-800 text-xl text-left">รายการทั้งหมด</p></div></div>
-                                <div class="bg-slate-50 p-8 rounded-[36px] flex items-center gap-6 text-left"><div class="p-5 bg-emerald-100 rounded-3xl text-emerald-600 font-black text-3xl">฿</div><div class="text-left"><p class="text-xs text-slate-400 font-black uppercase tracking-widest mb-1">งบประมาณ</p><p class="font-bold text-slate-800 text-xl text-left">${distBudget.toLocaleString()} บาท</p></div></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 text-left">
+                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6"><div class="p-4 bg-blue-50 rounded-2xl text-blue-600 font-black text-3xl">${filtered.length}</div><div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">โครงการ</p><p class="font-bold text-slate-800 text-xl">ในพื้นที่นี้</p></div></div>
+                                <div class="bg-white p-8 rounded-[32px] border border-slate-100 flex items-center gap-6"><div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 font-black text-2xl">฿</div><div><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">งบประมาณรวม</p><p class="font-bold text-slate-800 text-xl">${distBudget.toLocaleString()} บาท</p></div></div>
                             </div>
-                            <div class="space-y-4">`;
+                            <div class="space-y-4 text-left">`;
 
                         filtered.forEach((p, idx) => {
-                            const val = getProgressValue(p.Status);
-                            const color = getColor(val);
+                            const prog = getProgressValue(p.Status);
                             html += `
-                                <div class="group bg-white p-8 rounded-[36px] border border-slate-100 flex flex-col md:flex-row gap-8 items-center hover:border-indigo-200 transition-all text-left w-full">
-                                    <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-300 flex items-center justify-center text-xl font-black flex-shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-200 transition-colors">${idx+1}</div>
-                                    <div class="flex-1 w-full">
-                                        <div class="flex justify-between items-start mb-4 text-left"><h4 class="text-lg font-bold text-slate-800 leading-snug flex-1">${p.Project_Name}</h4><span class="ml-4 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest" style="background:${color}20; color:${color}">${p.Status}</span></div>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold text-slate-500 mb-6 text-left"><div>หน่วยงาน: <span class="text-slate-900">${p.Responsible_Unit}</span></div><div>งบประมาณ: <span class="text-slate-900">฿${(Number(p.Budget) || 0).toLocaleString()}</span></div></div>
-                                        <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden"><div class="h-full transition-all duration-1000" style="width:${val}%; background-color:${color}"></div></div>
+                                <div class="bg-white p-8 rounded-[32px] border border-slate-50 shadow-sm">
+                                    <h4 class="text-lg font-bold text-slate-800 mb-2">${p.Project_Name}</h4>
+                                    <p class="text-sm text-slate-500 mb-4">${p.Sub_Activity || p.Main_Activity}</p>
+                                    <div class="flex flex-wrap gap-4 text-xs font-bold text-slate-500 mb-6 uppercase tracking-wider">
+                                        <div>หน่วยงาน: <span class="text-slate-800">${p.Responsible_Unit}</span></div>
+                                        <div>งบประมาณ: <span class="text-slate-900">฿${(Number(p.Budget) || 0).toLocaleString()}</span></div>
                                     </div>
+                                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-2"><div class="h-full" style="width:${prog}%; background-color:${getColor(prog)}"></div></div>
+                                    <div class="flex justify-between text-[10px] font-black uppercase"><span class="text-slate-400">${p.Status}</span><span>${prog}%</span></div>
                                 </div>`;
                         });
-                        html += filtered.length === 0 ? '<div class="p-20 text-center text-slate-300 font-bold text-xl">ไม่มีข้อมูลโครงการในเขตพื้นที่นี้</div>' : '';
+                        
+                        if(filtered.length === 0) html += `<div class="p-20 text-center text-slate-400 font-bold">ไม่มีข้อมูลโครงการในเขตพื้นที่นี้</div>`;
                         html += `</div>`;
                         openModal(html);
                     });
                 }
             }).addTo(map);
 
-            // วาด Legend
             const legend = L.control({ position: 'bottomright' });
             legend.onAdd = function () {
                 const div = L.DomUtil.create('div', 'info legend');
-                const grades = [0, 20, 40, 60, 80, 100];
-                const labels = ['รอดำเนินการ', 'ร่างขอบเขต (TOR)', 'ดำเนินการ (In Progress)', 'ประกาศผู้ชนะ', 'ลงนามสัญญา', 'สำเร็จ (GFMIS)'];
-                div.innerHTML = '<div class="legend-title">ระดับความคืบหน้า</div>';
+                const grades = [0, 20, 50, 80, 100];
+                const labels = ['รอดำเนินการ', 'ร่าง TOR', 'กำลังดำเนินการ', 'ประกาศผู้ชนะ', 'เบิกจ่าย GFMIS'];
+                div.innerHTML = '<div class="legend-title">ระดับสถานะโครงการ</div>';
                 for (let i = 0; i < grades.length; i++) {
                     div.innerHTML += '<i style="background:' + getColor(grades[i]) + '"></i> ' + labels[i] + '<br>';
                 }
                 return div;
             };
             legend.addTo(map);
-            map.fitBounds(L.geoJSON(geoData).getBounds(), { padding: [20, 20] });
 
-        } catch (err) { console.error("Error loading dashboard:", err); }
+            map.fitBounds(L.geoJSON(geoData).getBounds(), { padding: [20, 20] });
+        } catch (err) { console.error(err); }
     }
     window.onload = initDashboard;
     </script>

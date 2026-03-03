@@ -93,7 +93,6 @@
             const rawData = await dataRes.json();
             const geoData = await geoRes.json();
 
-            // ดึงข้อมูลจาก Sheet1 ให้ถูกต้อง
             const projectData = Array.isArray(rawData) ? rawData : (rawData.Sheet1 || []);
 
             const uniqueProjects = [...new Set(projectData.map(p => p.Project_Name))];
@@ -104,7 +103,6 @@
             
             L.geoJSON(geoData, {
                 style: function(feature) {
-                    // ใช้ amphoe_t ให้ตรงกับไฟล์ districts.json ของคุณ
                     const dName = (feature.properties.amphoe_t || "").trim();
                     const projectsInDist = projectData.filter(p => 
                         p.Districts && p.Districts.replace('อำเภอ','').trim() === dName.replace('อำเภอ','').trim());

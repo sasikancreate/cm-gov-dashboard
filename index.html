@@ -71,10 +71,15 @@
     function getProgressValue(s) {
         if (!s) return 0;
         if (s.includes("GFMIS")) return 100;
-        if (s.includes("ลงนาม")) return 90;
-        if (s.includes("ประกาศผลผู้ชนะ")) return 80;
-        if (s.includes("ดำเนินการ")) return 50;
-        if (s.includes("ร่างขอบเขต")) return 20;
+        if (s.includes("ลงนามแล้ว")) return 90;
+        if (s.includes("อยู่ระหว่างประกาศผลผู้ชนะ")) return 80;
+        if (s.includes("อย่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง")) return 70;
+        if (s.includes("อยูระหว่างประกาศเชิญชวน")) return 60;
+        if (s.includes("อยู่ระหว่างดำเนินการ")) return 50;
+        if (s.includes("อยู่ระหว่างรออนุมัติรายงานขอซื้อขอจ้าง")) return 40;
+        if (s.includes("อยู่ระหว่างจัดทำร่างขอบเขตงาน")) return 30;
+        if (s.includes("อยู่ระหว่างอนุมัติโครงการ")) return 20;
+        if (s.includes("ยกเลิกกิจกรรม")) return 0;
         return 10;
     }
 

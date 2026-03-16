@@ -492,6 +492,18 @@
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
+    "Sub_Activity_ID": "",
+    "Project_ID": "",
+    "Project_Name": "",
+    "Main_Activity": "",
+    "Sub_Activity": "",
+    "Responsible_Unit": "",
+    "Districts": "",
+    "Budget": "",
+    "Area_Type": "",
+    "Status": ""
+  },
+  {
     "Sub_Activity_ID": "SA-06-01-00",
     "Project_ID": "STR-P06",
     "Project_Name": "โครงการยกระดับสุดยอดผลิตภัณฑ์เชิงสร้างสรรค์จังหวัดเชียงใหม่ (Top 50 Chiang Mai Soft Power Product Empower) สู่เศรษฐกิจมูลค่าสูง",

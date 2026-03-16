@@ -56,7 +56,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "แม่แจ่ม",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -68,7 +68,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "เมืองเชียงใหม่",
     "Budget": 15000000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง"
   },
   {

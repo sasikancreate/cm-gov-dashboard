@@ -20,7 +20,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "เชียงดาว",
     "Budget": 9978000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "ลงนามแล้วอยู่ระหว่างนำเข้าระบบ"
   },
   {
@@ -32,7 +32,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "เชียงดาว",
     "Budget": 4994000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง"
   },
   {
@@ -44,7 +44,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "จอมทอง",
     "Budget": 10000000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {

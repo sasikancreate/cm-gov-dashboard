@@ -308,7 +308,7 @@
     "Responsible_Unit": "ศูนย์วิจัยเกษตรหลวงเชียงใหม่",
     "Districts": "แม่แจ่ม",
     "Budget": 735000,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -320,7 +320,7 @@
     "Responsible_Unit": "ศูนย์วิจัยเกษตรหลวงเชียงใหม่",
     "Districts": "แม่วาง",
     "Budget": "",
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

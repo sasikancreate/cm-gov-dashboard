@@ -680,7 +680,7 @@
     "Responsible_Unit": "สำนักงานโยธาธิการและผังเมือง",
     "Districts": "สันป่าตอง",
     "Budget": 10500000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -692,7 +692,7 @@
     "Responsible_Unit": "สำนักงานโยธาธิการและผังเมือง",
     "Districts": "สันป่าตอง",
     "Budget": 12000000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -704,7 +704,7 @@
     "Responsible_Unit": "สำนักงานโยธาธิการและผังเมือง",
     "Districts": "จอมทอง",
     "Budget": 4250000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -716,7 +716,7 @@
     "Responsible_Unit": "สำนักงานโยธาธิการและผังเมือง",
     "Districts": "สันป่าตอง",
     "Budget": 9580000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -728,7 +728,7 @@
     "Responsible_Unit": "สำนักงานโยธาธิการและผังเมือง",
     "Districts": "แม่ริม",
     "Budget": 14000000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {

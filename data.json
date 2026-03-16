@@ -272,7 +272,7 @@
     "Responsible_Unit": "แขวงทางหลวงชนบทเชียงใหม่",
     "Districts": "เชียงดาว",
     "Budget": 12000000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -284,7 +284,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "แม่วาง",
     "Budget": 956000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

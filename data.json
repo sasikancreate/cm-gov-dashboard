@@ -8,7 +8,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "เชียงดาว",
     "Budget": 29000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างจัดทำร่างขอบเขตงาน"
   },
   {
@@ -20,7 +20,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "เชียงดาว",
     "Budget": 9978000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "ลงนามแล้วอยู่ระหว่างนำเข้าระบบ"
   },
   {
@@ -32,7 +32,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "เชียงดาว",
     "Budget": 4994000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง"
   },
   {
@@ -44,7 +44,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "จอมทอง",
     "Budget": 10000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -56,7 +56,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "แม่แจ่ม",
     "Budget": "",
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -68,7 +68,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "เมืองเชียงใหม่",
     "Budget": 15000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง"
   },
   {
@@ -80,7 +80,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "แม่ริม",
     "Budget": 7000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -92,7 +92,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "แม่ริม",
     "Budget": 10000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างอุทธรณ์ผลการจัดซื้อจัดจ้าง"
   },
   {
@@ -104,7 +104,7 @@
     "Responsible_Unit": "แขวงาทางหลวงเชียงใหม่ที่ 3",
     "Districts": "ฝาง",
     "Budget": 18000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างจัดทำร่างขอบเขตงาน"
   },
   {
@@ -116,7 +116,7 @@
     "Responsible_Unit": "แขวงทางหลวงชนบทเชียงใหม่",
     "Districts": "ดอยหล่อ",
     "Budget": 10000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างรอการอนุมัติรายงานขอซื้อขอจ้าง"
   },
   {
@@ -128,7 +128,7 @@
     "Responsible_Unit": "แขวงทางหลวงชนบทเชียงใหม่",
     "Districts": "จอมทอง",
     "Budget": 10000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -140,7 +140,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "อมก๋อย",
     "Budget": 20000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -152,7 +152,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "ดอยสะเก็ด",
     "Budget": 30000000,
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -164,7 +164,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "สันทราย",
     "Budget": "",
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -176,7 +176,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "เมืองเชียงใหม่",
     "Budget": "",
-    "Area_Type": "Specific",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {

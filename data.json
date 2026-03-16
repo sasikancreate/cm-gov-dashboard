@@ -312,18 +312,6 @@
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
-    "Sub_Activity_ID": "SA-05-03-00",
-    "Project_ID": "STR-P05",
-    "Project_Name": "โครงการยกระดับสินค้าเกษตรเพิ่มมูลค่า สู่การเป็นเมืองสุขภาพระดับโลก",
-    "Main_Activity": "กิจกรรมหลักที่ 3 พัฒนาพันธุ์พืชเศรษฐกิจบนพื้นที่สูง เพื่อเพิ่มผลผลิตและสร้างมูลค่า",
-    "Sub_Activity": "",
-    "Responsible_Unit": "ศูนย์วิจัยเกษตรหลวงเชียงใหม่",
-    "Districts": "แม่วาง",
-    "Budget": "",
-    "Area_Type": "multi_district",
-    "Status": "อยู่ระหว่างดำเนินการ"
-  },
-  {
     "Sub_Activity_ID": "SA-06-01-00",
     "Project_ID": "STR-P06",
     "Project_Name": "โครงการยกระดับสุดยอดผลิตภัณฑ์เชิงสร้างสรรค์จังหวัดเชียงใหม่ (Top 50 Chiang Mai Soft Power Product Empower) สู่เศรษฐกิจมูลค่าสูง",

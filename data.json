@@ -284,7 +284,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "แม่วาง",
     "Budget": 956000,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -296,7 +296,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "สะเมิง",
     "Budget": "",
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -308,7 +308,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "แม่แจ่ม",
     "Budget": "",
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -320,7 +320,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "จอมทอง",
     "Budget": "",
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -332,7 +332,7 @@
     "Responsible_Unit": "สำนักงานเกษตรจังหวัดเชียงใหม่",
     "Districts": "กัลยาณิวัฒนา",
     "Budget": "",
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

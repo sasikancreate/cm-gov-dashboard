@@ -632,7 +632,7 @@
     "Responsible_Unit": "ที่ทำการปกครองจังหวัดเชียงใหม่",
     "Districts": "เชียงดาว",
     "Budget": 1507600,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

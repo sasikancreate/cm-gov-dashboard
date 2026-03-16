@@ -440,7 +440,7 @@
     "Responsible_Unit": "สำนักงานประชาสัมพันธ์จังหวัดเชียงใหม่",
     "Districts": "จอมทอง",
     "Budget": 592500,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

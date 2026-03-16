@@ -488,7 +488,7 @@
     "Responsible_Unit": "ศูนย์วิจัยเกษตรหลวงเชียงใหม่",
     "Districts": "แม่แจ่ม",
     "Budget": 735000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -498,9 +498,9 @@
     "Main_Activity": "กิจกรรมหลักที่ 3 พัฒนาพันธุ์พืชเศรษฐกิจบนพื้นที่สูง เพื่อเพิ่มผลผลิตและสร้างมูลค่า",
     "Sub_Activity": "",
     "Responsible_Unit": "ศูนย์วิจัยเกษตรหลวงเชียงใหม่",
-    "Districts": "",
+    "Districts": "แม่วาง",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": ""
   },
   {

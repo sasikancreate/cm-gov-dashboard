@@ -872,7 +872,7 @@
     "Responsible_Unit": "ที่ทำการปกครองจังหวัดเชียงใหม่",
     "Districts": "ฝาง",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -884,7 +884,7 @@
     "Responsible_Unit": "ที่ทำการปกครองจังหวัดเชียงใหม่",
     "Districts": "แม่อาย",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -896,7 +896,7 @@
     "Responsible_Unit": "ที่ทำการปกครองจังหวัดเชียงใหม่",
     "Districts": "เวียงแหง",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -908,7 +908,7 @@
     "Responsible_Unit": "ที่ทำการปกครองจังหวัดเชียงใหม่",
     "Districts": "ไชยปราการ",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   }
 ]

@@ -44,7 +44,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 1",
     "Districts": "จอมทอง",
     "Budget": 10000000,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {

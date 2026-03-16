@@ -260,7 +260,7 @@
     "Responsible_Unit": "แขวงทางหลวงชนบทเชียงใหม่",
     "Districts": "อมก๋อย",
     "Budget": 40000000,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {

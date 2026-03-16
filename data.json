@@ -152,7 +152,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "ดอยสะเก็ด",
     "Budget": 30000000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -164,7 +164,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "สันทราย",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {
@@ -176,7 +176,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 2",
     "Districts": "เมืองเชียงใหม่",
     "Budget": "",
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "อยู่ระหว่างประกาศเชิญชวน"
   },
   {

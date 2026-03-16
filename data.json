@@ -188,7 +188,7 @@
     "Responsible_Unit": "แขวงทางหลวงเชียงใหม่ที่ 3",
     "Districts": "พร้าว",
     "Budget": 9967000,
-    "Area_Type": "",
+    "Area_Type": "Specific",
     "Status": "ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"
   },
   {
@@ -200,7 +200,7 @@
     "Responsible_Unit": "สำนักงานท่องเที่ยวและกีฬาจังหวัดเชียงใหม่",
     "Districts": "เมืองเชียงใหม่",
     "Budget": 3000000,
-    "Area_Type": "",
+    "Area_Type": "province_wide",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

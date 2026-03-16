@@ -522,9 +522,9 @@
     "Main_Activity": "กิจกรรมหลักที่ 1 บ่มเพาะและสร้างผู้ประกอบการใหม่ในอุตสาหกรรมและธุรกิจสุขภาพ (Health & Wellness Startup Creation)",
     "Sub_Activity": "",
     "Responsible_Unit": "สำนักงานอุตสาหกรรมจังหวัดเชียงใหม่",
-    "Districts": "เมืองเชียงใหม่",
+    "Districts": "พื้นที่จังหวัดเชียงใหม่",
     "Budget": 2500000,
-    "Area_Type": "",
+    "Area_Type": "province_wide",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

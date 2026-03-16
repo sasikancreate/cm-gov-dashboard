@@ -512,7 +512,7 @@
     "Responsible_Unit": "สำนักงานอุตสาหกรรมจังหวัดเชียงใหม่",
     "Districts": "พื้นที่จังหวัดเชียงใหม่",
     "Budget": 3000000,
-    "Area_Type": "",
+    "Area_Type": "province_wide",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {

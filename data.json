@@ -536,7 +536,7 @@
     "Responsible_Unit": "สำนังานพัฒนาสังคมและความมั่นคงของมนุษย์จังหวัดเชียงใหม่",
     "Districts": "สันกำแพง",
     "Budget": 289800,
-    "Area_Type": "specific",
+    "Area_Type": "multi_district",
     "Status": "อยู่ระหว่างอนุมัติโครงการ"
   },
   {

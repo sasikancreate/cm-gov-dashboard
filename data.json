@@ -800,7 +800,7 @@
     "Responsible_Unit": "สำนักงานปศุสัตว์จังหวัดเชียงใหม่",
     "Districts": "แม่อาย",
     "Budget": 228600,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "อยู่ระหว่างดำเนินการ"
   },
   {
@@ -812,7 +812,7 @@
     "Responsible_Unit": "สำนักบริหารพื้นที่อนุรักษ์ที่ 16",
     "Districts": "ม่อาย",
     "Budget": 631600,
-    "Area_Type": "",
+    "Area_Type": "specific",
     "Status": "ลงนามแล้ว"
   },
   {

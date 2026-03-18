@@ -97,24 +97,29 @@
                d >= 40  ? '#fb923c' : d >= 20 ? '#f87171' : d >= 1 ? '#ef4444' : '#94a3b8';
     }
 
-    // ─── แปลงสถานะ → % ───────────────────────────────────────────────────────
-    // แก้ไข bug typo และรองรับสถานะทุกรูปแบบที่พบในข้อมูลจริง
     function getProgressValue(s) {
         if (!s) return 0;
         const t = s.trim();
-        if (t.includes("GFMIS"))                    return 100;
-        if (t === "ลงนามแล้ว")                      return 90;
-        if (t.includes("ลงนามแล้ว"))                return 85; // ลงนามแล้วแต่ยังนำเข้าระบบไม่เสร็จ
-        if (t.includes("ประกาศผลผู้ชนะ"))            return 80;
-        if (t.includes("อุทธรณ์"))                   return 70;
-        if (t.includes("ประกาศเชิญชวน"))             return 60;
-        if (t.includes("อยู่ระหว่างดำเนินการ"))      return 50;
-        if (t.includes("รอการอนุมัติรายงาน") ||
-            t.includes("รออนุมัติรายงาน"))           return 40; // รองรับทั้ง 2 รูปแบบ
-        if (t.includes("จัดทำร่างขอบเขตงาน"))        return 30;
-        if (t.includes("อนุมัติโครงการ"))            return 20;
-        if (t.includes("ยกเลิก"))                   return 0;
-        return 10;
+        if (t.includes("รายงานผลการดำเนินงานให้จังหวัด"))  return 100;
+        if (t.includes("เบิกจ่ายงบประมาณ") ||
+            t.includes("ก่อหนี้และนำเข้าระบบ GFMIS แล้ว"))  return 90;
+        if (t.includes("ดำเนินการ") ||
+            t.includes("อยู่ระหว่างดำเนินการ"))             return 70;
+        if (t.includes("ลงนามในสัญญา") ||
+            t.includes("ลงนามแล้ว"))                    return 60;
+        if (t.includes("ประกาศผลการจัดซื้อจัดจ้าง") ||
+            t.includes("อยู่ระหว่างประกาศผลผู้ชนะ") || 
+            t.includes("อยู่ระหว่างอุทธรณ์"))               return 50;
+        if (t.includes("ดำเนินการจัดซื้อจัดจ้าง") ||
+            t.includes("อยู่ระหว่างประกาศเชิญชวน"))         return 40;
+        if (t.includes("จัดทำร่างขอบเขตงาน") ||
+            t.includes("อยู่ระหว่างจัดทำร่างขอบเขตงาน"))     return 30;
+        if (t.includes("ขออนุมัติดำเนินการ") ||
+            t.includes("อยู่ระหว่างรออนุมัติรายงานขอซื้อขอจ้าง")) return 20;
+        if (t.includes("อนุมัติโครงการ") ||
+            t.includes("อยู่ระหว่างอนุมัติโครงการ"))           return 10;
+        if (t.includes("ยกเลิกกิจกรรม"))                   return 0;
+        return 0;
     }
 
     // ─── ตรวจสอบว่ากิจกรรมนี้อยู่ในอำเภอที่คลิกไหม ────────────────────────
